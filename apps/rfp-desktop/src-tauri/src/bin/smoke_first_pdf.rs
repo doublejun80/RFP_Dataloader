@@ -44,9 +44,24 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
         &extraction.id,
         &PathBuf::from(json_path),
     )?;
-    let project_id = analysis::create_or_update_baseline_project(&conn, &document.id)?;
+    let project_id = analysis::create_or_update_candidate_project(&conn, &document.id)?;
     let generated_count: i64 =
         conn.query_row("SELECT COUNT(*) FROM rfp_projects", [], |row| row.get(0))?;
+    let field_count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM rfp_fields WHERE rfp_project_id = ?",
+        [&project_id],
+        |row| row.get(0),
+    )?;
+    let candidate_bundle_count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM candidate_bundles WHERE rfp_project_id = ?",
+        [&project_id],
+        |row| row.get(0),
+    )?;
+    let field_evidence_count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM evidence_links WHERE target_table = 'rfp_fields'",
+        [],
+        |row| row.get(0),
+    )?;
     let ready_count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM documents WHERE status = 'ready'",
         [],
@@ -77,6 +92,9 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
     println!("extraction_status={}", extraction.status);
     println!("document_blocks={block_count}");
     println!("generated_count={generated_count}");
+    println!("field_count={field_count}");
+    println!("candidate_bundle_count={candidate_bundle_count}");
+    println!("field_evidence_count={field_evidence_count}");
     println!("ready_count={ready_count}");
     println!("review_needed_count={review_needed_count}");
     println!("failed_count={failed_count}");
@@ -91,4 +109,3 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
         Ok(ExitCode::from(0))
     }
 }
-

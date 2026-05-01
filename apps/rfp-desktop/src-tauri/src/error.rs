@@ -37,9 +37,7 @@ impl Serialize for AppError {
             AppError::Io(message) => AppErrorDto::Io(message.to_string()),
             AppError::Json(message) => AppErrorDto::Json(message.to_string()),
             AppError::InvalidInput(message) => AppErrorDto::InvalidInput(message.clone()),
-            AppError::ExternalCommand(message) => {
-                AppErrorDto::ExternalCommand(message.clone())
-            }
+            AppError::ExternalCommand(message) => AppErrorDto::ExternalCommand(message.clone()),
             AppError::Path(message) => AppErrorDto::Path(message.clone()),
         };
         dto.serialize(serializer)

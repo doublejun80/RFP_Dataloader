@@ -8,6 +8,7 @@ fn greet(name: &str) -> String {
 
 pub mod analysis;
 pub mod block_normalizer;
+pub mod candidate_extractor;
 mod commands;
 pub mod db;
 pub mod document_ingestion;
@@ -32,7 +33,8 @@ pub fn run() {
             commands::documents::list_documents,
             commands::extraction::diagnose_opendataloader,
             commands::extraction::run_fast_extraction,
-            commands::pipeline::analyze_document_baseline
+            commands::pipeline::analyze_document_baseline,
+            commands::pipeline::analyze_document_candidates
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

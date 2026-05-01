@@ -13,6 +13,73 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 16: Candidate Extractor Implementation
+
+Completed task:
+
+- Implemented the first candidate extractor vertical slice from `docs/superpowers/plans/2026-05-02-candidate-extractor-plan.md`.
+- Added `rfp_fields`, `evidence_links`, and `candidate_bundles` migration.
+- Added deterministic candidate bundle scoring and storage for seven bundle keys.
+- Added rule-based project-info extraction for business name, client, budget, period, contract method, and deadline.
+- Added evidence links for every stored `rfp_fields` row.
+- Added candidate-aware validation so found project-info fields remove matching blockers, while `zero_requirements` remains a blocker.
+- Added `analyze_document_candidates` Tauri command and frontend API/types.
+- Added Korean 기본정보 and 후보 묶음 panels to the workbench.
+- Updated real PDF smoke to report candidate field, bundle, and evidence counts.
+- Marked Priority 2 Task 16 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/migrations/0002_candidate_extractor.sql`
+- `apps/rfp-desktop/src-tauri/src/candidate_extractor/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/analysis/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/validation/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/pipeline.rs`
+- `apps/rfp-desktop/src-tauri/src/domain.rs`
+- `apps/rfp-desktop/src-tauri/src/db/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `apps/rfp-desktop/src-tauri/src/bin/smoke_first_pdf.rs`
+- `apps/rfp-desktop/src/components/ProjectInfoPanel.tsx`
+- `apps/rfp-desktop/src/components/CandidateBundlePanel.tsx`
+- `apps/rfp-desktop/src/lib/types.ts`
+- `apps/rfp-desktop/src/lib/api.ts`
+- `apps/rfp-desktop/src/App.tsx`
+- `apps/rfp-desktop/src/App.test.tsx`
+- `apps/rfp-desktop/src/App.css`
+- `tests/smoke/README.md`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml candidate_extractor::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::pipeline::tests
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+npm run tauri build --prefix apps/rfp-desktop
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Result:
+
+- Focused backend tests passed.
+- `scripts/verify.sh` passed with 12 Rust tests, 3 frontend tests, frontend build, and smoke binary build.
+- `npm run tauri build --prefix apps/rfp-desktop` passed and produced `RFP Desktop.app`.
+- Real PDF smoke succeeded at extraction with `document_blocks=743`, `field_count=4`, `candidate_bundle_count=7`, `field_evidence_count=4`, `review_needed_count=1`, `failed_count=0`, `blocker_count=3`, and `warning_count=1`.
+- Real PDF smoke returned exit code 2 by design because `zero_requirements` and remaining blockers are still reported separately from execution failure.
+
+Remaining task:
+
+- Next implementation wave should start from the domain writer plan to persist requirements, procurement, staffing, deliverables, acceptance, risks, and richer evidence links.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Priority 2 Planning Wave Completed
 
 Completed task:

@@ -43,3 +43,43 @@ pub struct PipelineSummary {
     pub review_needed_count: i64,
     pub failed_count: i64,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct EvidenceLinkDto {
+    pub document_block_id: String,
+    pub quote: String,
+    pub confidence: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct RfpFieldDto {
+    pub id: String,
+    pub field_key: String,
+    pub label: String,
+    pub raw_value: String,
+    pub normalized_value: String,
+    pub confidence: f64,
+    pub source: String,
+    pub evidence: Vec<EvidenceLinkDto>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct CandidateBundleSummaryDto {
+    pub bundle_key: String,
+    pub candidate_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct CandidateExtractionSummary {
+    pub document: DocumentSummary,
+    pub project_id: String,
+    pub fields: Vec<RfpFieldDto>,
+    pub bundles: Vec<CandidateBundleSummaryDto>,
+    pub ready_count: i64,
+    pub review_needed_count: i64,
+    pub failed_count: i64,
+}

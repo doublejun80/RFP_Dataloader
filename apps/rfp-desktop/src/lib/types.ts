@@ -44,6 +44,38 @@ export interface PipelineSummary {
   failedCount: number;
 }
 
+export interface EvidenceLinkDto {
+  documentBlockId: string;
+  quote: string;
+  confidence: number;
+}
+
+export interface RfpFieldDto {
+  id: string;
+  fieldKey: string;
+  label: string;
+  rawValue: string;
+  normalizedValue: string;
+  confidence: number;
+  source: string;
+  evidence: EvidenceLinkDto[];
+}
+
+export interface CandidateBundleSummaryDto {
+  bundleKey: string;
+  candidateCount: number;
+}
+
+export interface CandidateExtractionSummary {
+  document: DocumentSummary;
+  projectId: string;
+  fields: RfpFieldDto[];
+  bundles: CandidateBundleSummaryDto[];
+  readyCount: number;
+  reviewNeededCount: number;
+  failedCount: number;
+}
+
 export interface OpenDataLoaderDiagnostic {
   cliFound: boolean;
   javaFound: boolean;

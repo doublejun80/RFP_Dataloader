@@ -338,3 +338,25 @@ Done when:
 Plan:
 
 - `docs/superpowers/plans/2026-05-02-export-plan.md`
+
+## Priority 2: Candidate Extractor Implementation
+
+### [x] 16. Implement candidate extractor vertical slice
+
+Done when:
+
+- SQLite migration exists for `rfp_fields`, `evidence_links`, and `candidate_bundles`.
+- Candidate scoring creates seven deterministic bundle keys from `document_blocks`.
+- Rule extraction writes project-info `rfp_fields` and one evidence link per field.
+- Candidate validation removes found project-info blockers while keeping `zero_requirements`.
+- Tauri exposes `analyze_document_candidates`.
+- Frontend runs candidate analysis and displays 기본정보 plus candidate bundle counts.
+- Smoke output reports `field_count`, `candidate_bundle_count`, and `field_evidence_count`.
+- Repository verification and real PDF smoke complete.
+
+Verification:
+
+```bash
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```

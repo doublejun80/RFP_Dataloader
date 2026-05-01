@@ -3,17 +3,23 @@ import { FilePlus, Play, RefreshCw, SearchCheck } from "lucide-react";
 
 import "./App.css";
 import { BlockPreview } from "./components/BlockPreview";
+import { CandidateBundlePanel } from "./components/CandidateBundlePanel";
 import { DocumentList } from "./components/DocumentList";
+import { ProjectInfoPanel } from "./components/ProjectInfoPanel";
 import { QualityGate } from "./components/QualityGate";
 import { StatusBadge } from "./components/StatusBadge";
 import {
-  analyzeDocumentBaseline,
+  analyzeDocumentCandidates,
   diagnoseOpenDataLoader,
   listDocuments,
   registerDocumentByPath,
   runFastExtraction,
 } from "./lib/api";
-import type { DocumentSummary, OpenDataLoaderDiagnostic } from "./lib/types";
+import type {
+  CandidateExtractionSummary,
+  DocumentSummary,
+  OpenDataLoaderDiagnostic,
+} from "./lib/types";
 
 type ActionName = "refresh" | "register" | "diagnose" | "analyze";
 
@@ -44,6 +50,8 @@ function App() {
   const [pathInput, setPathInput] = useState("");
   const [diagnostic, setDiagnostic] =
     useState<OpenDataLoaderDiagnostic | null>(null);
+  const [candidateSummary, setCandidateSummary] =
+    useState<CandidateExtractionSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<ActionName | null>(null);
 
@@ -96,6 +104,10 @@ function App() {
     void runAction("refresh", refreshDocuments);
   }, []);
 
+  useEffect(() => {
+    setCandidateSummary(null);
+  }, [selectedDocument?.id]);
+
   async function handleRegister() {
     const path = pathInput.trim();
 
@@ -124,7 +136,7 @@ function App() {
 
     await runAction("analyze", async () => {
       await runFastExtraction(selectedDocument.id);
-      await analyzeDocumentBaseline(selectedDocument.id);
+      setCandidateSummary(await analyzeDocumentCandidates(selectedDocument.id));
       await refreshDocuments();
     });
   }
@@ -223,6 +235,12 @@ function App() {
           )}
 
           <QualityGate summary={selectedQuality} />
+          {selectedDocument ? (
+            <>
+              <ProjectInfoPanel fields={candidateSummary?.fields ?? []} />
+              <CandidateBundlePanel bundles={candidateSummary?.bundles ?? []} />
+            </>
+          ) : null}
           <BlockPreview document={selectedDocument} />
         </section>
       </section>

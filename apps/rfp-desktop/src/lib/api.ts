@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import type {
+  CandidateExtractionSummary,
   DocumentSummary,
   ExtractionRunSummary,
   OpenDataLoaderDiagnostic,
@@ -34,4 +35,12 @@ export function analyzeDocumentBaseline(
   documentId: string,
 ): Promise<PipelineSummary> {
   return invoke<PipelineSummary>("analyze_document_baseline", { documentId });
+}
+
+export function analyzeDocumentCandidates(
+  documentId: string,
+): Promise<CandidateExtractionSummary> {
+  return invoke<CandidateExtractionSummary>("analyze_document_candidates", {
+    documentId,
+  });
 }
