@@ -34,11 +34,47 @@ git status --short
 
 Result:
 
-- Pending final command output in this work cycle.
+- Frontend build passed.
+- Rust tests passed after updating `src-tauri/src/main.rs` to the new `rfp_desktop_lib::run()` crate name.
 
 Remaining task:
 
 - Priority 1 Task 1: scaffold Tauri React app.
+
+Blockers:
+
+- None.
+
+### 2026-05-02 - Task 1: Scaffold Tauri React App
+
+Completed task:
+
+- Created Tauri v2 React/TypeScript scaffold under `apps/rfp-desktop`.
+- Installed frontend dependencies and test dependencies.
+- Installed Rust with Homebrew because the environment did not have `cargo` or `rustc`.
+- Added planned Rust dependencies to `src-tauri/Cargo.toml`.
+- Normalized scaffold names to `rfp-desktop` / `rfp_desktop_lib`.
+
+Files changed:
+
+- `apps/rfp-desktop/`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+npm run build --prefix apps/rfp-desktop
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+```
+
+Result:
+
+- Pending final command output in this work cycle.
+
+Remaining task:
+
+- Priority 1 Task 2: add SQLite schema and migration runner.
 
 Blockers:
 

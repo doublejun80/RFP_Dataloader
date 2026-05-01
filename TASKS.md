@@ -33,7 +33,7 @@ Verification:
 git status --short
 ```
 
-### [ ] 1. Scaffold Tauri React app
+### [x] 1. Scaffold Tauri React app
 
 Done when:
 
