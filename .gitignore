@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+target/
+dist/
+*.sqlite3
+*.db
+*.log
+apps/rfp-desktop/src-tauri/target/
+apps/rfp-desktop/dist/
+apps/rfp-desktop/node_modules/
+fixtures/rfp_bundle/**/*.pdf
+.worktrees/
+worktrees/
