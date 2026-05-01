@@ -483,10 +483,12 @@ fn store_project_info_fields(
         }
 
         let field_id = Uuid::new_v4().to_string();
+        let now = Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO rfp_fields (
-                id, rfp_project_id, field_key, label, raw_value, normalized_value, confidence, source
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, 'rule')",
+                id, rfp_project_id, field_key, label, raw_value, normalized_value,
+                confidence, source, created_at, updated_at
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, 'rule', ?, ?)",
             params![
                 field_id,
                 rfp_project_id,
@@ -495,18 +497,21 @@ fn store_project_info_fields(
                 candidate.raw_value,
                 candidate.normalized_value,
                 candidate.confidence,
+                now,
+                now,
             ],
         )?;
         conn.execute(
             "INSERT INTO evidence_links (
-                id, document_block_id, target_table, target_id, quote, confidence
-             ) VALUES (?, ?, 'rfp_fields', ?, ?, ?)",
+                id, document_block_id, target_table, target_id, quote, confidence, created_at
+             ) VALUES (?, ?, 'rfp_fields', ?, ?, ?, ?)",
             params![
                 Uuid::new_v4().to_string(),
                 candidate.snippet.document_block_id,
                 field_id,
                 candidate.snippet.quote,
                 candidate.confidence,
+                now,
             ],
         )?;
         inserted += 1;

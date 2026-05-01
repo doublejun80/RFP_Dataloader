@@ -360,3 +360,34 @@ Verification:
 scripts/verify.sh
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
 ```
+
+## Priority 2: Domain Writer Implementation
+
+### [x] 17. Implement domain writer vertical slice
+
+Done when:
+
+- SQLite migration exists for `requirements`, `procurement_items`, `staffing_requirements`, `deliverables`, `acceptance_criteria`, and `risk_clauses`.
+- Existing `rfp_fields` and `evidence_links` schema is widened for domain writer use, with a legacy-schema repair path.
+- `DomainDraft` DTOs and `domain_writer` boundary exist.
+- `write_domain_draft` transactionally persists fields, requirements, procurement, staffing/MM, deliverables, acceptance criteria, risks, and evidence links.
+- Same-document evidence validation rejects rows without usable block evidence.
+- Numeric quantity, headcount, MM, and onsite values are normalized locally from source text.
+- Orphan child rows can create deterministic generated requirements.
+- Domain-aware validation can mark complete evidenced domain rows `ready` and missing required rows `review_needed`.
+- Baseline/candidate re-analysis clears stale durable domain rows.
+- Smoke output reports domain row and domain evidence counts.
+- Focused Rust tests, repository verification, frontend tests/build, and real PDF smoke complete.
+
+Verification:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml domain_writer
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml validation::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests
+scripts/verify.sh
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```

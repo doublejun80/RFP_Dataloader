@@ -10,14 +10,18 @@ CREATE TABLE IF NOT EXISTS rfp_fields (
       'budget',
       'period',
       'contract_method',
-      'deadline'
+      'deadline',
+      'evaluation_ratio',
+      'requirement_count'
     )
   ),
   label TEXT NOT NULL,
   raw_value TEXT NOT NULL,
   normalized_value TEXT NOT NULL,
   confidence REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0),
-  source TEXT NOT NULL CHECK (source IN ('rule', 'llm', 'correction'))
+  source TEXT NOT NULL CHECK (source IN ('rule', 'llm', 'correction')),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_rfp_fields_project_key
@@ -26,14 +30,28 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_rfp_fields_project_key
 CREATE TABLE IF NOT EXISTS evidence_links (
   id TEXT PRIMARY KEY,
   document_block_id TEXT NOT NULL REFERENCES document_blocks(id) ON DELETE CASCADE,
-  target_table TEXT NOT NULL,
+  target_table TEXT NOT NULL CHECK (
+    target_table IN (
+      'rfp_fields',
+      'requirements',
+      'procurement_items',
+      'staffing_requirements',
+      'deliverables',
+      'acceptance_criteria',
+      'risk_clauses'
+    )
+  ),
   target_id TEXT NOT NULL,
   quote TEXT NOT NULL,
-  confidence REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0)
+  confidence REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0),
+  created_at TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_evidence_links_target
   ON evidence_links(target_table, target_id);
+
+CREATE INDEX IF NOT EXISTS idx_evidence_links_block_id
+  ON evidence_links(document_block_id);
 
 CREATE TABLE IF NOT EXISTS candidate_bundles (
   id TEXT PRIMARY KEY,

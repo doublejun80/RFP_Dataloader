@@ -13,6 +13,69 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 17: Domain Writer Implementation
+
+Completed task:
+
+- Implemented the domain writer vertical slice from `docs/superpowers/plans/2026-05-02-domain-writer-plan.md`.
+- Added durable domain schema for `requirements`, `procurement_items`, `staffing_requirements`, `deliverables`, `acceptance_criteria`, and `risk_clauses`.
+- Widened shared `rfp_fields` and `evidence_links` schema for domain writer use and added an idempotent legacy-schema repair path for DBs created before the widened columns/checks.
+- Added `DomainDraft` DTOs and a `domain_writer` backend boundary.
+- Added transactional domain draft writing with same-document evidence validation, rejection summaries, audit events, generated requirements, and local numeric/onsite normalization.
+- Added domain-aware validation for required project fields, requirements, evidence links, quantity/confidence/risk findings, and `ready` vs `review_needed` status updates.
+- Added `analysis::write_domain_analysis` and stale-domain cleanup before baseline/candidate re-analysis.
+- Updated candidate field/evidence inserts for timestamped shared schema.
+- Updated smoke output and README with domain row/evidence counts.
+- Addressed read-only review findings for legacy schema repair, stale domain rows, and signed/comma-aware numeric parsing.
+- Marked Priority 2 Task 17 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/migrations/0002_candidate_extractor.sql`
+- `apps/rfp-desktop/src-tauri/migrations/0003_domain_writer.sql`
+- `apps/rfp-desktop/src-tauri/src/domain_writer/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/domain_writer/evidence.rs`
+- `apps/rfp-desktop/src-tauri/src/domain_writer/numeric.rs`
+- `apps/rfp-desktop/src-tauri/src/db/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/analysis/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/validation/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/candidate_extractor/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `apps/rfp-desktop/src-tauri/src/bin/smoke_first_pdf.rs`
+- `tests/smoke/README.md`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml domain_writer
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml validation::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests
+scripts/verify.sh
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Result:
+
+- Focused backend tests passed: `db::tests` 4 tests, `domain_writer` 10 tests, `validation::tests` 2 tests, and `analysis::tests` 4 tests.
+- `scripts/verify.sh` passed with 27 Rust tests, 3 frontend tests, frontend build, and smoke binary build.
+- Explicit `npm run test --prefix apps/rfp-desktop` passed with 1 file and 3 tests.
+- Explicit `npm run build --prefix apps/rfp-desktop` passed.
+- Real PDF smoke succeeded at extraction with `document_blocks=743`, `field_count=4`, `candidate_bundle_count=7`, `field_evidence_count=4`, `requirement_count=0`, `procurement_item_count=0`, `staffing_requirement_count=0`, `deliverable_count=0`, `acceptance_criteria_count=0`, `risk_clause_count=0`, `domain_evidence_count=0`, `review_needed_count=1`, `failed_count=0`, `blocker_count=3`, and `warning_count=1`.
+- Real PDF smoke returned exit code 2 by design because candidate-only generation still has blockers and no adapter is feeding `DomainDraft` into the writer yet.
+
+Remaining task:
+
+- Next implementation wave should start from the LLM adapter plan or a deterministic candidate-to-`DomainDraft` adapter so the domain writer can receive durable requirement/item/staffing/deliverable/acceptance/risk drafts.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 16: Candidate Extractor Implementation
 
 Completed task:

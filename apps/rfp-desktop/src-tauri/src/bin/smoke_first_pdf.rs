@@ -62,6 +62,31 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
         [],
         |row| row.get(0),
     )?;
+    let requirement_count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM requirements WHERE rfp_project_id = ?",
+        [&project_id],
+        |row| row.get(0),
+    )?;
+    let procurement_item_count: i64 = count_child_rows(&conn, &project_id, "procurement_items")?;
+    let staffing_requirement_count: i64 =
+        count_child_rows(&conn, &project_id, "staffing_requirements")?;
+    let deliverable_count: i64 = count_child_rows(&conn, &project_id, "deliverables")?;
+    let acceptance_criteria_count: i64 =
+        count_child_rows(&conn, &project_id, "acceptance_criteria")?;
+    let risk_clause_count: i64 = count_child_rows(&conn, &project_id, "risk_clauses")?;
+    let domain_evidence_count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM evidence_links
+         WHERE target_table IN (
+            'requirements',
+            'procurement_items',
+            'staffing_requirements',
+            'deliverables',
+            'acceptance_criteria',
+            'risk_clauses'
+         )",
+        [],
+        |row| row.get(0),
+    )?;
     let ready_count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM documents WHERE status = 'ready'",
         [],
@@ -95,6 +120,13 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
     println!("field_count={field_count}");
     println!("candidate_bundle_count={candidate_bundle_count}");
     println!("field_evidence_count={field_evidence_count}");
+    println!("requirement_count={requirement_count}");
+    println!("procurement_item_count={procurement_item_count}");
+    println!("staffing_requirement_count={staffing_requirement_count}");
+    println!("deliverable_count={deliverable_count}");
+    println!("acceptance_criteria_count={acceptance_criteria_count}");
+    println!("risk_clause_count={risk_clause_count}");
+    println!("domain_evidence_count={domain_evidence_count}");
     println!("ready_count={ready_count}");
     println!("review_needed_count={review_needed_count}");
     println!("failed_count={failed_count}");
@@ -108,4 +140,21 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
     } else {
         Ok(ExitCode::from(0))
     }
+}
+
+fn count_child_rows(
+    conn: &rusqlite::Connection,
+    project_id: &str,
+    table_name: &str,
+) -> Result<i64, rusqlite::Error> {
+    conn.query_row(
+        &format!(
+            "SELECT COUNT(*)
+             FROM {table_name} child
+             JOIN requirements r ON r.id = child.requirement_id
+             WHERE r.rfp_project_id = ?"
+        ),
+        [project_id],
+        |row| row.get(0),
+    )
 }

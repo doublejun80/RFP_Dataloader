@@ -13,6 +13,7 @@ mod commands;
 pub mod db;
 pub mod document_ingestion;
 pub mod domain;
+pub mod domain_writer;
 pub mod error;
 pub mod opendataloader_adapter;
 mod state;

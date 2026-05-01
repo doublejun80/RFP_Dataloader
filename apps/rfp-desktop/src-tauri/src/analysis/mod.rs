@@ -3,6 +3,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use uuid::Uuid;
 
 use crate::candidate_extractor;
+use crate::domain_writer;
 use crate::error::AppResult;
 use crate::validation;
 
@@ -10,6 +11,8 @@ const ANALYSIS_VERSION: &str = "rfp-v2-baseline-2026-05-01";
 const BASELINE_SUMMARY: &str = "LLM 없이 생성된 1차 분석 초안입니다.";
 const CANDIDATE_ANALYSIS_VERSION: &str = "rfp-v2-candidates-2026-05-02";
 const CANDIDATE_SUMMARY: &str = "규칙 기반 후보 추출로 생성된 분석 초안입니다.";
+const DOMAIN_ANALYSIS_VERSION: &str = "rfp-v2-domain-writer-2026-05-02";
+const DOMAIN_SUMMARY: &str = "구조화 domain draft로 생성된 분석 초안입니다.";
 
 pub fn create_or_update_baseline_project(
     conn: &Connection,
@@ -17,6 +20,7 @@ pub fn create_or_update_baseline_project(
 ) -> AppResult<String> {
     let project_id =
         create_or_update_project_row(conn, document_id, ANALYSIS_VERSION, BASELINE_SUMMARY)?;
+    domain_writer::clear_project_domain_rows(conn, &project_id)?;
     validation::evaluate_baseline_project(conn, &project_id)?;
     Ok(project_id)
 }
@@ -31,9 +35,24 @@ pub fn create_or_update_candidate_project(
         CANDIDATE_ANALYSIS_VERSION,
         CANDIDATE_SUMMARY,
     )?;
+    domain_writer::clear_project_domain_rows(conn, &project_id)?;
     candidate_extractor::extract_and_store_candidates(conn, &project_id)?;
     validation::evaluate_candidate_project(conn, &project_id)?;
     Ok(project_id)
+}
+
+pub fn write_domain_analysis(
+    conn: &mut Connection,
+    document_id: &str,
+    draft: domain_writer::DomainDraft,
+) -> AppResult<domain_writer::DomainWriteSummary> {
+    let project_id =
+        create_or_update_project_row(conn, document_id, DOMAIN_ANALYSIS_VERSION, DOMAIN_SUMMARY)?;
+    let summary = domain_writer::write_domain_draft(conn, &project_id, draft)?;
+    validation::evaluate_project(conn, &project_id)?;
+    validation::insert_domain_rejections(conn, &project_id, &summary.rejections)?;
+    validation::refresh_project_status_from_findings(conn, &project_id)?;
+    Ok(summary)
 }
 
 fn create_or_update_project_row(
@@ -79,6 +98,7 @@ mod tests {
 
     use super::*;
     use crate::db;
+    use crate::domain_writer::test_support::{full_domain_draft, seed_document_project_and_blocks};
 
     #[test]
     fn baseline_analysis_creates_review_needed_project_and_blockers() {
@@ -170,6 +190,55 @@ mod tests {
                 |row| row.get(0),
             )
             .expect("zero requirements blocker");
+        assert_eq!(zero_requirements, 1);
+    }
+
+    #[test]
+    fn domain_analysis_writes_draft_and_marks_ready_when_gate_passes() {
+        let temp = tempdir().expect("temp dir");
+        let mut conn = db::open_database(&temp.path().join("test.sqlite3")).expect("open db");
+        seed_document_project_and_blocks(&conn);
+
+        let summary =
+            write_domain_analysis(&mut conn, "doc-1", full_domain_draft()).expect("domain write");
+
+        assert_eq!(summary.requirements_written, 1);
+        let status: String = conn
+            .query_row(
+                "SELECT status FROM rfp_projects WHERE id = ?",
+                [summary.rfp_project_id.as_str()],
+                |row| row.get(0),
+            )
+            .expect("project status");
+        assert_eq!(status, "ready");
+    }
+
+    #[test]
+    fn candidate_analysis_after_domain_write_clears_stale_domain_rows() {
+        let temp = tempdir().expect("temp dir");
+        let mut conn = db::open_database(&temp.path().join("test.sqlite3")).expect("open db");
+        seed_document_project_and_blocks(&conn);
+
+        write_domain_analysis(&mut conn, "doc-1", full_domain_draft()).expect("domain write");
+        let project_id = create_or_update_candidate_project(&conn, "doc-1").expect("candidate");
+
+        let requirement_count: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM requirements WHERE rfp_project_id = ?",
+                [project_id.as_str()],
+                |row| row.get(0),
+            )
+            .expect("requirement count");
+        assert_eq!(requirement_count, 0);
+
+        let zero_requirements: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM validation_findings
+                 WHERE rfp_project_id = ? AND finding_type = 'zero_requirements'",
+                [project_id.as_str()],
+                |row| row.get(0),
+            )
+            .expect("zero requirements");
         assert_eq!(zero_requirements, 1);
     }
 }
