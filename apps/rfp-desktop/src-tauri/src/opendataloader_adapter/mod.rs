@@ -32,7 +32,7 @@ pub fn build_fast_mode_args(input: &Path, output_dir: &Path) -> Vec<String> {
 
 pub fn diagnose(cli_path: Option<PathBuf>) -> OpenDataLoaderDiagnostic {
     let cli = cli_path.unwrap_or_else(|| PathBuf::from("opendataloader-pdf"));
-    let cli_output = Command::new(&cli).arg("--version").output();
+    let cli_output = Command::new(&cli).arg("--help").output();
     let java_output = Command::new("java").arg("-version").output();
 
     let cli_found = cli_output

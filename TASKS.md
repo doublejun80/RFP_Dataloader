@@ -253,7 +253,7 @@ Optional real PDF verification:
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- /absolute/path/to/rfp.pdf
 ```
 
-### [!] 10. Final verification checkpoint
+### [x] 10. Final verification checkpoint
 
 Done when:
 
@@ -280,39 +280,61 @@ Manual verification:
 npm run tauri dev --prefix apps/rfp-desktop
 ```
 
-Blocked on:
+Real PDF smoke result:
 
-- No local real RFP PDF fixture was found under this repository.
-- `opendataloader-pdf` is not currently available in `PATH`.
+- `opendataloader-pdf` is installed at `/Users/doublejun_air/.local/bin/opendataloader-pdf`.
+- Verified with `rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf`.
+- The smoke command created document, extraction, block, project, and finding rows.
+- The smoke command returned exit code 2 because validation blockers were intentionally reported separately from execution failure.
 
 ## Priority 2: Next Plans After Vertical Slice
 
-### [ ] 11. Candidate extractor plan
+### [x] 11. Candidate extractor plan
 
 Done when:
 
 - A new plan exists for `rfp_fields` and candidate bundles from `document_blocks`.
 
-### [ ] 12. LLM adapter plan
+Plan:
+
+- `docs/superpowers/plans/2026-05-02-candidate-extractor-plan.md`
+
+### [x] 12. LLM adapter plan
 
 Done when:
 
 - A new plan exists for OpenAI/Gemini structured output, schema validation, and `llm_runs`.
 
-### [ ] 13. Domain writer plan
+Plan:
+
+- `docs/superpowers/plans/2026-05-02-llm-adapter-plan.md`
+
+### [x] 13. Domain writer plan
 
 Done when:
 
 - A new plan exists for requirements, procurement, staffing, deliverables, acceptance, risks, and evidence links.
 
-### [ ] 14. Review UI plan
+Plan:
+
+- `docs/superpowers/plans/2026-05-02-domain-writer-plan.md`
+
+### [x] 14. Review UI plan
 
 Done when:
 
 - A new plan exists for overview, BOM, staffing/MM, requirements, risk, and source evidence viewer.
 
-### [ ] 15. Export plan
+Plan:
+
+- `docs/superpowers/plans/2026-05-02-review-ui-plan.md`
+
+### [x] 15. Export plan
 
 Done when:
 
 - A new plan exists for Markdown, JSON, and Docx export from DB snapshots.
+
+Plan:
+
+- `docs/superpowers/plans/2026-05-02-export-plan.md`

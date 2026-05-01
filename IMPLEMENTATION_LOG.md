@@ -13,16 +13,26 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
-### 2026-05-02 - Task 10: Final Verification Checkpoint
+### 2026-05-02 - Priority 2 Planning Wave Completed
 
 Completed task:
 
-- Ran the repository verification script after integrating Tasks 0 through 9.
-- Confirmed Rust tests, frontend tests, frontend build, and smoke binary build pass.
-- Checked for a local PDF fixture and OpenDataLoader CLI.
+- Created implementation-ready plans for Priority 2 Tasks 11 through 15 using parallel workers.
+- Added candidate extractor, LLM adapter, domain writer, review UI, and export plans under `docs/superpowers/plans/`.
+- Fixed OpenDataLoader diagnostics to use `opendataloader-pdf --help`, matching the installed CLI behavior.
+- Changed Tauri bundling target to `app` so the default build avoids the failing DMG packaging step and produces a local `.app`.
+- Marked Priority 2 Tasks 11 through 15 complete.
 
 Files changed:
 
+- `docs/superpowers/plans/2026-05-02-candidate-extractor-plan.md`
+- `docs/superpowers/plans/2026-05-02-llm-adapter-plan.md`
+- `docs/superpowers/plans/2026-05-02-domain-writer-plan.md`
+- `docs/superpowers/plans/2026-05-02-review-ui-plan.md`
+- `docs/superpowers/plans/2026-05-02-export-plan.md`
+- `apps/rfp-desktop/src-tauri/src/opendataloader_adapter/mod.rs`
+- `apps/rfp-desktop/src-tauri/tauri.conf.json`
+- `.gitignore`
 - `TASKS.md`
 - `IMPLEMENTATION_LOG.md`
 
@@ -30,8 +40,51 @@ Verification command:
 
 ```bash
 scripts/verify.sh
-command -v opendataloader-pdf || true
-find /Users/doublejun_air/github/RFP_Dataloader -iname '*.pdf' -print
+npm run tauri build --prefix apps/rfp-desktop
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Result:
+
+- `scripts/verify.sh` passed after the OpenDataLoader diagnostic fix.
+- `npm run tauri build --prefix apps/rfp-desktop` passed after narrowing bundle targets to `.app`.
+- Real PDF smoke succeeded at extraction with `document_blocks=743`, `generated_count=1`, `review_needed_count=1`, `failed_count=0`, `blocker_count=5`, and `warning_count=1`.
+- The smoke command returned exit code 2 by design because validation blockers were reported separately from execution failure.
+
+Remaining task:
+
+- No incomplete tasks remain in `TASKS.md`. Next work should start from the candidate extractor plan unless the product priority changes.
+
+Blockers:
+
+- None.
+
+### 2026-05-02 - Task 10: Final Verification Checkpoint
+
+Completed task:
+
+- Installed Java/OpenJDK and `opendataloader-pdf` CLI via `pipx`.
+- Ran the repository verification script after integrating Tasks 0 through 9.
+- Confirmed Rust tests, frontend tests, frontend build, and smoke binary build pass.
+- Ran a real RFP PDF through the smoke pipeline from `rfp/rfp_bundle`.
+- Updated OpenDataLoader diagnostics to use `opendataloader-pdf --help`, because the installed CLI does not support `--version`.
+- Marked Priority 1 Task 10 complete.
+
+Files changed:
+
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+- `.gitignore`
+- `apps/rfp-desktop/src-tauri/src/opendataloader_adapter/mod.rs`
+
+Verification command:
+
+```bash
+scripts/verify.sh
+command -v opendataloader-pdf
+opendataloader-pdf --help
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml opendataloader_adapter::tests::fast_mode_args_are_bounded_and_explicit
 ```
 
 Result:
@@ -41,20 +94,20 @@ Result:
 - Frontend tests passed: 1 file, 2 tests.
 - Frontend build passed.
 - Smoke binary build passed.
-- No local PDF fixture was found under the repository.
-- `opendataloader-pdf` is not available in `PATH`.
+- `opendataloader-pdf` is available at `/Users/doublejun_air/.local/bin/opendataloader-pdf`.
+- Real PDF smoke succeeded at extraction: `extraction_status=succeeded`.
+- Real PDF smoke inserted `document_blocks=743`.
+- Real PDF smoke generated one baseline project with `review_needed_count=1`, `failed_count=0`, `blocker_count=5`, and `warning_count=1`.
+- Smoke returned exit code 2 by design because blockers are reported separately from execution failure.
+- Focused OpenDataLoader adapter test passed after changing diagnostics to `--help`.
 
 Remaining task:
 
-- Provide a real RFP PDF path and install or expose `opendataloader-pdf`, then run:
-
-```bash
-cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- /absolute/path/to/rfp.pdf
-```
+- Priority 1 is complete. Continue with Priority 2 planning for candidate extraction, LLM adapter, review UI, and export.
 
 Blockers:
 
-- Priority 1 Task 10 is blocked on a local real PDF fixture and OpenDataLoader CLI availability.
+- None.
 
 ### 2026-05-02 - Task 9: Add Real PDF Smoke Command
 

@@ -9,5 +9,7 @@ apps/rfp-desktop/src-tauri/target/
 apps/rfp-desktop/dist/
 apps/rfp-desktop/node_modules/
 fixtures/rfp_bundle/**/*.pdf
+rfp/rfp_bundle/
+.smoke-rfp-v2/
 .worktrees/
 worktrees/
