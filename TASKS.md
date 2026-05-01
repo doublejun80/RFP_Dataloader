@@ -225,7 +225,7 @@ npm run test --prefix apps/rfp-desktop
 npm run build --prefix apps/rfp-desktop
 ```
 
-### [ ] 9. Add real PDF smoke command
+### [x] 9. Add real PDF smoke command
 
 Done when:
 
@@ -253,7 +253,7 @@ Optional real PDF verification:
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- /absolute/path/to/rfp.pdf
 ```
 
-### [ ] 10. Final verification checkpoint
+### [!] 10. Final verification checkpoint
 
 Done when:
 
@@ -279,6 +279,11 @@ Manual verification:
 ```bash
 npm run tauri dev --prefix apps/rfp-desktop
 ```
+
+Blocked on:
+
+- No local real RFP PDF fixture was found under this repository.
+- `opendataloader-pdf` is not currently available in `PATH`.
 
 ## Priority 2: Next Plans After Vertical Slice
 

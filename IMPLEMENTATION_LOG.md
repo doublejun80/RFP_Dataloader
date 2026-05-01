@@ -13,6 +13,86 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 10: Final Verification Checkpoint
+
+Completed task:
+
+- Ran the repository verification script after integrating Tasks 0 through 9.
+- Confirmed Rust tests, frontend tests, frontend build, and smoke binary build pass.
+- Checked for a local PDF fixture and OpenDataLoader CLI.
+
+Files changed:
+
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+scripts/verify.sh
+command -v opendataloader-pdf || true
+find /Users/doublejun_air/github/RFP_Dataloader -iname '*.pdf' -print
+```
+
+Result:
+
+- `scripts/verify.sh` passed.
+- Rust tests passed: 6 tests.
+- Frontend tests passed: 1 file, 2 tests.
+- Frontend build passed.
+- Smoke binary build passed.
+- No local PDF fixture was found under the repository.
+- `opendataloader-pdf` is not available in `PATH`.
+
+Remaining task:
+
+- Provide a real RFP PDF path and install or expose `opendataloader-pdf`, then run:
+
+```bash
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- /absolute/path/to/rfp.pdf
+```
+
+Blockers:
+
+- Priority 1 Task 10 is blocked on a local real PDF fixture and OpenDataLoader CLI availability.
+
+### 2026-05-02 - Task 9: Add Real PDF Smoke Command
+
+Completed task:
+
+- Added `smoke_first_pdf` binary.
+- Added smoke README with expected fields and exit code semantics.
+- Exported Rust modules needed by the smoke binary.
+- Marked Priority 1 Task 9 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/src/bin/smoke_first_pdf.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `tests/smoke/README.md`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+cargo build --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf
+```
+
+Result:
+
+- Rust tests passed: 6 tests.
+- Smoke binary build passed.
+
+Remaining task:
+
+- Priority 1 Task 10: final verification checkpoint.
+
+Blockers:
+
+- Real PDF smoke needs a local PDF fixture path and OpenDataLoader CLI.
+
 ### 2026-05-02 - Parallel Wave 1 Completed
 
 Completed task:

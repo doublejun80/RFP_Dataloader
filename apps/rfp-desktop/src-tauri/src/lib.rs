@@ -6,14 +6,14 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+pub mod analysis;
+pub mod block_normalizer;
 mod commands;
-mod analysis;
-mod block_normalizer;
-mod db;
-mod document_ingestion;
-mod domain;
-mod error;
-mod opendataloader_adapter;
+pub mod db;
+pub mod document_ingestion;
+pub mod domain;
+pub mod error;
+pub mod opendataloader_adapter;
 mod state;
 mod validation;
 
