@@ -79,7 +79,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests::migrates_core_tables
 ```
 
-### [ ] 3. Implement PDF document registration
+### [x] 3. Implement PDF document registration
 
 Done when:
 

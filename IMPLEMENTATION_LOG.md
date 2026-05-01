@@ -13,6 +13,44 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 3: Implement PDF Document Registration
+
+Completed task:
+
+- Added document/domain DTOs.
+- Added PDF registration with SHA-256 duplicate detection, source file row, and audit event row.
+- Added document list/load helpers.
+- Added Tauri commands for registering and listing documents.
+- Marked Priority 1 Task 3 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/src/domain.rs`
+- `apps/rfp-desktop/src-tauri/src/document_ingestion/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/documents.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml document_ingestion::tests::register_document_creates_source_file_and_audit_event
+```
+
+Result:
+
+- Passed. Rust emitted dead-code warnings for DTOs and state fields that will be used by the parallel follow-up tasks.
+
+Remaining task:
+
+- Priority 1 Tasks 4, 5, 6, and 8 are now eligible for parallel work.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 2: Add SQLite Schema and Migration Runner
 
 Completed task:
