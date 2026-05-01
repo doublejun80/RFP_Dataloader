@@ -103,7 +103,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml document_ingestion::tests::register_document_creates_source_file_and_audit_event
 ```
 
-### [ ] 4. Implement OpenDataLoader diagnostics and fast extraction
+### [x] 4. Implement OpenDataLoader diagnostics and fast extraction
 
 Parallel-safe after Task 3.
 
@@ -128,7 +128,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml opendataloader_adapter::tests::fast_mode_args_are_bounded_and_explicit
 ```
 
-### [ ] 5. Normalize OpenDataLoader JSON blocks
+### [x] 5. Normalize OpenDataLoader JSON blocks
 
 Parallel-safe after Task 3.
 
@@ -151,7 +151,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml block_normalizer::tests::normalizes_key_variants_and_nested_elements
 ```
 
-### [ ] 6. Add baseline analysis and validation gate
+### [x] 6. Add baseline analysis and validation gate
 
 Parallel-safe after Task 3.
 
@@ -174,7 +174,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests::baseline_analysis_creates_review_needed_project_and_blockers
 ```
 
-### [ ] 7. Orchestrate first analysis pipeline
+### [x] 7. Orchestrate first analysis pipeline
 
 Done when:
 
@@ -194,7 +194,7 @@ Verification:
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::pipeline::tests::summarize_document_reports_review_needed_after_blocks_and_validation
 ```
 
-### [ ] 8. Build first-screen RFP workbench UI
+### [x] 8. Build first-screen RFP workbench UI
 
 Parallel-safe after Task 3 if API DTO names are stable.
 

@@ -1,0 +1,28 @@
+[
+  {
+    "id": 42,
+    "type": "heading",
+    "page number": 1,
+    "bounding box": [72.0, 700.0, 540.0, 730.0],
+    "heading level": 1,
+    "content": "사업 개요"
+  },
+  {
+    "id": "req-1",
+    "kind": "table",
+    "page_number": 2,
+    "bbox": [72.0, 400.0, 540.0, 650.0],
+    "text": "요구사항 고유번호 SFR-001 통합 로그인 기능"
+  },
+  {
+    "elements": [
+      {
+        "id": "risk-1",
+        "role": "paragraph",
+        "page": 3,
+        "bounding box": [72.0, 300.0, 540.0, 350.0],
+        "value": "필요 시 추가 산출물을 무상으로 제출한다."
+      }
+    ]
+  }
+]

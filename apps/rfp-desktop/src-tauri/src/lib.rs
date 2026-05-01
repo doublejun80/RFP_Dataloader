@@ -7,11 +7,15 @@ fn greet(name: &str) -> String {
 }
 
 mod commands;
+mod analysis;
+mod block_normalizer;
 mod db;
 mod document_ingestion;
 mod domain;
 mod error;
+mod opendataloader_adapter;
 mod state;
+mod validation;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -25,7 +29,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             commands::documents::register_document_by_path,
-            commands::documents::list_documents
+            commands::documents::list_documents,
+            commands::extraction::diagnose_opendataloader,
+            commands::extraction::run_fast_extraction,
+            commands::pipeline::analyze_document_baseline
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
