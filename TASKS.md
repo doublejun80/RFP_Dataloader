@@ -56,7 +56,7 @@ npm run build --prefix apps/rfp-desktop
 cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
 ```
 
-### [ ] 2. Add SQLite schema and migration runner
+### [x] 2. Add SQLite schema and migration runner
 
 Done when:
 

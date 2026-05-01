@@ -13,6 +13,45 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 2: Add SQLite Schema and Migration Runner
+
+Completed task:
+
+- Added core SQLite migration for document, extraction, block, project, finding, and audit tables.
+- Added `db::open_database` and `db::migrate`.
+- Added serializable application error type.
+- Added app state that opens the local SQLite database in the Tauri app data directory.
+- Wired state setup into Tauri builder.
+- Marked Priority 1 Task 2 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/migrations/0001_core.sql`
+- `apps/rfp-desktop/src-tauri/src/db/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/error.rs`
+- `apps/rfp-desktop/src-tauri/src/state.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests::migrates_core_tables
+```
+
+Result:
+
+- Passed. Rust emitted dead-code warnings for variants/state methods that will be used by subsequent tasks.
+
+Remaining task:
+
+- Priority 1 Task 3: implement PDF document registration.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 0: Initialize Repository Tracking
 
 Completed task:
