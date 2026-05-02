@@ -545,3 +545,28 @@ npm run build --prefix apps/rfp-desktop
 scripts/verify.sh
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/04_공공/15_KIND_경영정보시스템_구축_제안요청서.pdf"
 ```
+
+### [x] 24. Replace free-form LLM model entry with provider presets
+
+Done when:
+
+- LLM settings no longer ask users to type a raw model string.
+- OpenAI model choices are provider-specific presets with `gpt-5.5` as the default.
+- Gemini model choices are provider-specific presets with `gemini-2.5-pro` as the default.
+- Switching provider resets the model to that provider's default.
+- Existing empty or legacy stored model values such as `gpt-4.1-mini` are normalized before display and execution.
+- Backend settings validation rejects unsupported model strings.
+- API keys remain in keychain/env only and are not stored in SQLite plaintext.
+- Focused UI/settings tests, full Rust/frontend tests, frontend build, and repository verification pass.
+
+Verification:
+
+```bash
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::settings::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::openai::tests::openai_request_uses_json_schema_and_excludes_api_key_from_snapshot
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```

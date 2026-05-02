@@ -309,8 +309,8 @@ beforeEach(() => {
       return Promise.resolve({
         enabled: true,
         offlineMode: false,
-        provider: "openai",
-        model: "gpt-4.1-mini",
+        provider: "gemini",
+        model: "gemini-2.5-pro",
         apiKeyConfigured: true,
       });
     }
@@ -383,11 +383,17 @@ describe("App", () => {
     render(<App />);
 
     await screen.findByText("LLM 구조화 꺼짐");
+    expect(screen.getByRole("combobox", { name: "LLM 모델" })).toHaveValue(
+      "gpt-5.5",
+    );
     fireEvent.click(screen.getByLabelText("LLM 사용"));
     fireEvent.click(screen.getByLabelText("오프라인 모드"));
-    fireEvent.change(screen.getByLabelText("LLM 모델"), {
-      target: { value: "gpt-4.1-mini" },
+    fireEvent.change(screen.getByRole("combobox", { name: "LLM 제공자" }), {
+      target: { value: "gemini" },
     });
+    expect(screen.getByRole("combobox", { name: "LLM 모델" })).toHaveValue(
+      "gemini-2.5-pro",
+    );
     fireEvent.change(screen.getByLabelText("API 키"), {
       target: { value: "sk-test-local" },
     });
@@ -398,8 +404,8 @@ describe("App", () => {
         request: {
           enabled: true,
           offlineMode: false,
-          provider: "openai",
-          model: "gpt-4.1-mini",
+          provider: "gemini",
+          model: "gemini-2.5-pro",
           apiKey: "sk-test-local",
         },
       });

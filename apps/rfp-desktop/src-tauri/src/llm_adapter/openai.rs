@@ -170,7 +170,7 @@ mod tests {
         let result = call_openai_structured_output(
             &transport,
             "test-key",
-            "gpt-4o-mini",
+            "gpt-5.5",
             LlmSchemaName::ProjectInfo,
             &sample_envelope(),
         )
@@ -200,7 +200,7 @@ mod tests {
         let error = call_openai_structured_output(
             &transport,
             "test-key",
-            "gpt-4o-mini",
+            "gpt-5.5",
             LlmSchemaName::ProjectInfo,
             &sample_envelope(),
         )
@@ -213,7 +213,7 @@ mod tests {
     #[ignore]
     fn openai_live_structured_output_roundtrip() {
         let api_key = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY");
-        let model = std::env::var("OPENAI_MODEL").unwrap_or_else(|_| "gpt-4o-mini".into());
+        let model = std::env::var("OPENAI_MODEL").unwrap_or_else(|_| "gpt-5.5".into());
         let transport = crate::llm_adapter::http::ReqwestTransport::new().expect("transport");
         let envelope = sample_envelope();
 

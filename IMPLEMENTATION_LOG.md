@@ -13,6 +13,62 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 24: LLM Model Preset Selection
+
+Completed task:
+
+- Reproduced the UX bug with failing tests: the LLM settings panel exposed `LLM 모델` as a free-form text input and surfaced the stale `gpt-4.1-mini` value.
+- Replaced the raw model text input with provider-specific dropdown presets.
+- Updated OpenAI defaults and presets to `gpt-5.5`, `gpt-5.5-pro`, `gpt-5.4-mini`, and `gpt-5.4-nano`.
+- Updated Gemini defaults and presets to `gemini-2.5-pro`, `gemini-2.5-flash`, and `gemini-flash-latest`.
+- Added backend normalization so empty or legacy model values such as `gpt-4.1-mini` load and execute as the provider default instead of silently using stale settings.
+- Added backend validation so unsupported model strings are rejected on save.
+- Updated OpenAI adapter fake tests and live-test fallback from old mini defaults to `gpt-5.5`.
+- Did not make any live provider call during verification.
+- Marked Priority 2 Task 24 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src/components/LlmSettingsPanel.tsx`
+- `apps/rfp-desktop/src/App.test.tsx`
+- `apps/rfp-desktop/src-tauri/migrations/0004_llm.sql`
+- `apps/rfp-desktop/src-tauri/src/llm_adapter/settings.rs`
+- `apps/rfp-desktop/src-tauri/src/llm_adapter/openai.rs`
+- `apps/rfp-desktop/src-tauri/src/llm_adapter/runner.rs`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::settings::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::openai::tests::openai_request_uses_json_schema_and_excludes_api_key_from_snapshot
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```
+
+Result:
+
+- Focused App test passed: 9 tests.
+- Focused LLM settings tests passed: 3 tests.
+- Focused OpenAI adapter snapshot test passed.
+- Full Rust tests passed: 50 passed and 2 live-provider tests ignored.
+- Full frontend tests passed: 1 file and 9 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+
+Remaining task:
+
+- Relaunch Tauri for manual verification of the new dropdown UI.
+- Next implementation wave can proceed to export or correction UX.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 23: Offline Candidate Domain Rows
 
 Completed task:

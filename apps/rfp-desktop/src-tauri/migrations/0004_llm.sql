@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS llm_settings (
   enabled INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0, 1)),
   offline_mode INTEGER NOT NULL DEFAULT 1 CHECK (offline_mode IN (0, 1)),
   provider TEXT NOT NULL DEFAULT 'openai' CHECK (provider IN ('openai', 'gemini')),
-  model TEXT NOT NULL DEFAULT '',
+  model TEXT NOT NULL DEFAULT 'gpt-5.5',
   api_key_ref TEXT,
   updated_at TEXT NOT NULL
 );
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS llm_settings (
 INSERT INTO llm_settings (
   id, enabled, offline_mode, provider, model, api_key_ref, updated_at
 ) VALUES (
-  1, 0, 1, 'openai', '', NULL, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+  1, 0, 1, 'openai', 'gpt-5.5', NULL, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
 )
 ON CONFLICT(id) DO NOTHING;
 

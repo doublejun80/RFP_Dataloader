@@ -431,7 +431,7 @@ mod tests {
     fn successful_run_persists_succeeded_llm_run() {
         let conn = seeded_conn_with_project_and_extraction();
         let store = InMemorySecretStore::with_key(LlmProvider::OpenAi, "test-key");
-        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-4o-mini");
+        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-5.5");
         let transport = SequenceTransport::single_success(project_info_success_response());
 
         let summary = run_structured_extraction(
@@ -486,7 +486,7 @@ mod tests {
     fn schema_rejection_persists_rejected_run_and_schema_invalid_finding() {
         let conn = seeded_conn_with_project_and_extraction();
         let store = InMemorySecretStore::with_key(LlmProvider::OpenAi, "test-key");
-        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-4o-mini");
+        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-5.5");
         let transport = SequenceTransport::single_success(project_info_missing_required_response());
 
         let error = run_structured_extraction(
@@ -523,7 +523,7 @@ mod tests {
     fn retryable_provider_error_retries_then_succeeds() {
         let conn = seeded_conn_with_project_and_extraction();
         let store = InMemorySecretStore::with_key(LlmProvider::OpenAi, "test-key");
-        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-4o-mini");
+        save_enabled_settings(&conn, LlmProvider::OpenAi, "gpt-5.5");
         let transport = SequenceTransport::new(vec![
             retryable_status_response(429),
             HttpJsonResponse {

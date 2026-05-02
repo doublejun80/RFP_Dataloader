@@ -18,9 +18,29 @@ interface LlmSettingsPanelProps {
 }
 
 const DEFAULT_MODELS: Record<LlmProvider, string> = {
-  openai: "gpt-4.1-mini",
-  gemini: "gemini-2.5-flash",
+  openai: "gpt-5.5",
+  gemini: "gemini-2.5-pro",
 };
+
+const MODEL_OPTIONS: Record<LlmProvider, Array<{ label: string; value: string }>> = {
+  openai: [
+    { label: "GPT-5.5 (권장, 최신)", value: "gpt-5.5" },
+    { label: "GPT-5.5 Pro (고정밀)", value: "gpt-5.5-pro" },
+    { label: "GPT-5.4 Mini (비용/속도)", value: "gpt-5.4-mini" },
+    { label: "GPT-5.4 Nano (최저비용)", value: "gpt-5.4-nano" },
+  ],
+  gemini: [
+    { label: "Gemini 2.5 Pro (권장)", value: "gemini-2.5-pro" },
+    { label: "Gemini 2.5 Flash (비용/속도)", value: "gemini-2.5-flash" },
+    { label: "Gemini Flash Latest (최신 alias)", value: "gemini-flash-latest" },
+  ],
+};
+
+function modelForProvider(provider: LlmProvider, candidate: string): string {
+  return MODEL_OPTIONS[provider].some((option) => option.value === candidate)
+    ? candidate
+    : DEFAULT_MODELS[provider];
+}
 
 export function LlmSettingsPanel({
   document,
@@ -44,7 +64,7 @@ export function LlmSettingsPanel({
     setEnabled(settings.enabled);
     setOfflineMode(settings.offlineMode);
     setProvider(settings.provider);
-    setModel(settings.model || DEFAULT_MODELS[settings.provider]);
+    setModel(modelForProvider(settings.provider, settings.model));
     setApiKey("");
   }, [settings]);
 
@@ -77,7 +97,7 @@ export function LlmSettingsPanel({
 
   function handleProviderChange(nextProvider: LlmProvider) {
     setProvider(nextProvider);
-    setModel((currentModel) => currentModel || DEFAULT_MODELS[nextProvider]);
+    setModel(DEFAULT_MODELS[nextProvider]);
   }
 
   return (
@@ -128,11 +148,17 @@ export function LlmSettingsPanel({
         </label>
         <label className="llm-field">
           <span>모델</span>
-          <input
+          <select
             aria-label="LLM 모델"
             onChange={(event) => setModel(event.target.value)}
             value={model}
-          />
+          >
+            {MODEL_OPTIONS[provider].map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="llm-field llm-field--key">
           <span>API 키</span>

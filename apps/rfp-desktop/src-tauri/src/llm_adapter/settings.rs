@@ -9,6 +9,12 @@ use crate::error::{AppError, AppResult};
 use super::contracts::LlmProvider;
 
 const KEYCHAIN_SERVICE: &str = "rfp-desktop";
+const OPENAI_DEFAULT_MODEL: &str = "gpt-5.5";
+const GEMINI_DEFAULT_MODEL: &str = "gemini-2.5-pro";
+const OPENAI_SUPPORTED_MODELS: &[&str] =
+    &["gpt-5.5", "gpt-5.5-pro", "gpt-5.4-mini", "gpt-5.4-nano"];
+const GEMINI_SUPPORTED_MODELS: &[&str] =
+    &["gemini-2.5-pro", "gemini-2.5-flash", "gemini-flash-latest"];
 
 fn keychain_user(provider: &LlmProvider) -> &'static str {
     match provider {
@@ -99,6 +105,7 @@ pub fn load_llm_settings(
         |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )?;
     let provider = provider_from_db(&provider)?;
+    let model = normalize_model(&provider, &model);
     let api_key_configured = load_api_key(store, &provider)?.is_some();
 
     Ok(LlmSettings {
@@ -115,12 +122,7 @@ pub fn save_llm_settings(
     store: &dyn SecretStore,
     request: SaveLlmSettingsRequest,
 ) -> AppResult<()> {
-    let model = request.model.trim().to_string();
-    if request.enabled && model.is_empty() {
-        return Err(AppError::InvalidInput(
-            "LLM model is required when LLM is enabled".into(),
-        ));
-    }
+    let model = validate_or_default_model(&request.provider, &request.model)?;
 
     let api_key_ref = if let Some(api_key) = request.api_key.as_deref().map(str::trim) {
         if api_key.is_empty() {
@@ -206,6 +208,44 @@ fn provider_from_db(value: &str) -> AppResult<LlmProvider> {
     }
 }
 
+fn default_model(provider: &LlmProvider) -> &'static str {
+    match provider {
+        LlmProvider::OpenAi => OPENAI_DEFAULT_MODEL,
+        LlmProvider::Gemini => GEMINI_DEFAULT_MODEL,
+    }
+}
+
+fn supported_models(provider: &LlmProvider) -> &'static [&'static str] {
+    match provider {
+        LlmProvider::OpenAi => OPENAI_SUPPORTED_MODELS,
+        LlmProvider::Gemini => GEMINI_SUPPORTED_MODELS,
+    }
+}
+
+fn normalize_model(provider: &LlmProvider, model: &str) -> String {
+    let trimmed = model.trim();
+    if supported_models(provider).contains(&trimmed) {
+        trimmed.to_string()
+    } else {
+        default_model(provider).to_string()
+    }
+}
+
+fn validate_or_default_model(provider: &LlmProvider, model: &str) -> AppResult<String> {
+    let trimmed = model.trim();
+    if trimmed.is_empty() {
+        return Ok(default_model(provider).to_string());
+    }
+    if supported_models(provider).contains(&trimmed) {
+        Ok(trimmed.to_string())
+    } else {
+        Err(AppError::InvalidInput(format!(
+            "unsupported LLM model '{trimmed}' for provider {}",
+            provider.as_str()
+        )))
+    }
+}
+
 fn offline_forced_by_env() -> bool {
     std::env::var("RFP_LLM_OFFLINE")
         .ok()
@@ -269,7 +309,30 @@ mod tests {
 
         assert!(!settings.enabled);
         assert!(settings.offline_mode);
+        assert_eq!(settings.model, "gpt-5.5");
         assert!(!settings.api_key_configured);
+    }
+
+    #[test]
+    fn load_settings_normalizes_legacy_or_empty_model_to_provider_default() {
+        let conn = Connection::open_in_memory().expect("db");
+        crate::db::migrate(&conn).expect("migrate");
+
+        conn.execute(
+            "UPDATE llm_settings SET model = 'gpt-4.1-mini' WHERE id = 1",
+            [],
+        )
+        .expect("seed legacy openai model");
+        let settings = load_llm_settings(&conn, &InMemorySecretStore::default()).expect("settings");
+        assert_eq!(settings.model, "gpt-5.5");
+
+        conn.execute(
+            "UPDATE llm_settings SET provider = 'gemini', model = '' WHERE id = 1",
+            [],
+        )
+        .expect("seed empty gemini model");
+        let settings = load_llm_settings(&conn, &InMemorySecretStore::default()).expect("settings");
+        assert_eq!(settings.model, "gemini-2.5-pro");
     }
 
     #[test]
@@ -285,7 +348,7 @@ mod tests {
                 enabled: true,
                 offline_mode: false,
                 provider: LlmProvider::OpenAi,
-                model: "gpt-4o-mini".into(),
+                model: "gpt-5.5".into(),
                 api_key: Some("sk-test-secret".into()),
             },
         )
@@ -299,7 +362,7 @@ mod tests {
             )
             .expect("stored settings");
 
-        assert!(stored_json.contains("openai:gpt-4o-mini:keychain:"));
+        assert!(stored_json.contains("openai:gpt-5.5:keychain:"));
         assert!(!stored_json.contains("sk-test-secret"));
     }
 }
