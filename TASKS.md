@@ -520,3 +520,28 @@ npm run test --prefix apps/rfp-desktop
 npm run build --prefix apps/rfp-desktop
 scripts/verify.sh
 ```
+
+### [x] 23. Populate durable domain rows from offline candidate analysis
+
+Done when:
+
+- Candidate analysis no longer leaves durable domain tables empty when LLM is disabled/offline.
+- Persisted candidate bundles are converted into a rule-sourced `DomainDraft`.
+- Existing project-info fields and evidence links are preserved through the domain writer.
+- Requirements, procurement BOM, staffing/MM, deliverables, acceptance criteria, and risk clauses are written through the existing domain writer, not frontend-only state.
+- Domain rows include source evidence block IDs, quotes, confidence, and validation findings.
+- No live LLM provider call is made.
+- Focused Rust tests, full Rust/frontend tests, repository verification, and real PDF smoke complete.
+
+Verification:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests::candidate_analysis_writes_rule_domain_rows_from_candidate_bundles
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::pipeline::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/04_공공/15_KIND_경영정보시스템_구축_제안요청서.pdf"
+```

@@ -13,6 +13,60 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 23: Offline Candidate Domain Rows
+
+Completed task:
+
+- Reproduced the user's core issue with a failing regression test: candidate analysis created candidate bundles but left durable `requirements`, `procurement_items`, `staffing_requirements`, `deliverables`, `acceptance_criteria`, and `risk_clauses` empty.
+- Added a rule-based candidate-to-domain bridge that loads persisted candidate bundle JSON, preserves existing `rfp_fields` evidence, builds a `DomainDraft(source=rule)`, and writes through the existing domain writer.
+- Wired `create_or_update_candidate_project` so the normal `추출/분석` path now writes durable domain rows even when LLM settings are disabled/offline.
+- Kept LLM live provider calls out of the default path.
+- Real PDF smoke now writes nonzero durable domain rows: `requirement_count=12`, `procurement_item_count=8`, `staffing_requirement_count=8`, `deliverable_count=5`, `acceptance_criteria_count=8`, `risk_clause_count=8`, and `domain_evidence_count=49`.
+- The smoke document remains `검토 필요` because `business_name` was not extracted from that PDF and rule rows are intentionally low-confidence review candidates.
+- Marked Priority 2 Task 23 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/src/candidate_domain.rs`
+- `apps/rfp-desktop/src-tauri/src/analysis/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/domain_writer/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests::candidate_analysis_writes_rule_domain_rows_from_candidate_bundles
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml analysis::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::pipeline::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml candidate_extractor::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/04_공공/15_KIND_경영정보시스템_구축_제안요청서.pdf"
+```
+
+Result:
+
+- Focused regression test passed.
+- Focused analysis, pipeline, and candidate extractor tests passed.
+- Full Rust tests passed: 49 passed and 2 live-provider tests ignored.
+- Full frontend tests passed: 1 file and 9 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+- Real PDF smoke exited 2 as expected for `검토 필요`, with nonzero durable domain rows and 1 blocker: `missing_business_name`.
+
+Remaining task:
+
+- Next implementation wave can proceed to export or correction UX.
+- Existing already-analyzed app documents may need `추출/분석` rerun to backfill the new rule-sourced domain rows.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 22: Candidate Visibility and LLM Structuring Controls
 
 Completed task:

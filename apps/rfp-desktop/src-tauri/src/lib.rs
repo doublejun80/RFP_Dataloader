@@ -8,6 +8,7 @@ fn greet(name: &str) -> String {
 
 pub mod analysis;
 pub mod block_normalizer;
+pub mod candidate_domain;
 pub mod candidate_extractor;
 mod commands;
 pub mod db;

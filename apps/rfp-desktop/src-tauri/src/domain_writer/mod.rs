@@ -160,11 +160,11 @@ pub struct DomainWriteSummary {
 }
 
 pub fn write_domain_draft(
-    conn: &mut Connection,
+    conn: &Connection,
     rfp_project_id: &str,
     draft: DomainDraft,
 ) -> AppResult<DomainWriteSummary> {
-    let tx = conn.transaction()?;
+    let tx = conn.unchecked_transaction()?;
     let document_id: String = tx.query_row(
         "SELECT document_id FROM rfp_projects WHERE id = ?",
         [rfp_project_id],
