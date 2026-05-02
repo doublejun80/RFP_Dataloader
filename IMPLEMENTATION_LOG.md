@@ -13,6 +13,51 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 20: Tauri Dev Launch Fix
+
+Completed task:
+
+- Reproduced the manual launch blocker with `npm run tauri -- dev`.
+- Fixed Cargo binary selection after the `smoke_first_pdf` binary addition by setting `default-run = "rfp-desktop"`.
+- Verified the Tauri dev server responds on `http://localhost:1420/`.
+- Verified the desktop app process launches as `target/debug/rfp-desktop`.
+- Marked Priority 2 Task 20 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/Cargo.toml`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+npm run tauri -- dev
+curl -I http://localhost:1420/
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```
+
+Result:
+
+- Initial Tauri dev launch failed because Cargo could not choose between `rfp-desktop` and `smoke_first_pdf`.
+- After the `default-run` fix, Tauri dev launch built and started `target/debug/rfp-desktop`.
+- `curl -I http://localhost:1420/` returned `HTTP/1.1 200 OK`.
+- Full Rust tests passed: 48 passed and 2 live-provider tests ignored.
+- Frontend tests passed: 1 file and 6 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+
+Remaining task:
+
+- Next implementation wave can proceed to the export plan for Markdown, JSON, and Docx outputs from review snapshots.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 19: Review UI Implementation
 
 Completed task:

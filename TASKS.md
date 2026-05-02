@@ -454,3 +454,23 @@ npm run build --prefix apps/rfp-desktop
 scripts/verify.sh
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
 ```
+
+### [x] 20. Fix Tauri dev launch after smoke binary addition
+
+Done when:
+
+- `npm run tauri -- dev` can choose the desktop app binary even though `smoke_first_pdf` also exists.
+- The Tauri dev server responds on `http://localhost:1420/`.
+- The `rfp-desktop` desktop process launches for manual testing.
+- Repository verification still passes.
+
+Verification:
+
+```bash
+npm run tauri -- dev
+curl -I http://localhost:1420/
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```
