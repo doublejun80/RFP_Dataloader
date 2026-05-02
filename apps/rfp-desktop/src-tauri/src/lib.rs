@@ -24,6 +24,7 @@ mod validation;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let state = state::AppState::from_app_handle(app.handle())?;
             app.manage(state);

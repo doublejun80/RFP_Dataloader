@@ -13,6 +13,63 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 21: PDF File Selection UX Fix
+
+Completed task:
+
+- Reproduced the user-facing blocker: `문서 추가` only worked after manually pasting an absolute path, and the workbench had no native PDF picker.
+- Added a TDD regression test for selecting a PDF path and registering it through `register_document_by_path`.
+- Added the Tauri dialog plugin so the workbench can open a native PDF file picker.
+- Added a `PDF 선택` button that fills the absolute path input and enables the existing `문서 추가` flow.
+- Updated Tauri capability permissions for dialog access.
+- Tightened the toolbar layout so primary actions fit the default 800px Tauri window.
+- Added dependency: `@tauri-apps/plugin-dialog` and `tauri-plugin-dialog` because Tauri v2 file dialogs live in a separate plugin and browser file inputs cannot provide reliable absolute local paths.
+- Marked Priority 2 Task 21 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/package.json`
+- `apps/rfp-desktop/package-lock.json`
+- `apps/rfp-desktop/src-tauri/Cargo.toml`
+- `apps/rfp-desktop/src-tauri/Cargo.lock`
+- `apps/rfp-desktop/src-tauri/capabilities/default.json`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `apps/rfp-desktop/src/App.tsx`
+- `apps/rfp-desktop/src/App.css`
+- `apps/rfp-desktop/src/App.test.tsx`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+scripts/verify.sh
+npm run tauri -- dev
+curl -I http://localhost:1420/
+```
+
+Result:
+
+- Focused App tests passed: 7 tests.
+- Full frontend tests passed: 1 file and 7 tests.
+- Frontend build passed.
+- Full Rust tests passed: 48 passed and 2 live-provider tests ignored.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+- Tauri dev launch built and started `target/debug/rfp-desktop`.
+- `curl -I http://localhost:1420/` returned `HTTP/1.1 200 OK`.
+
+Remaining task:
+
+- The app is ready for manual PDF selection and registration testing. Next implementation wave can proceed to the export plan.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 20: Tauri Dev Launch Fix
 
 Completed task:

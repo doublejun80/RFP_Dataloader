@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FilePlus, Play, RefreshCw, SearchCheck } from "lucide-react";
+import { FilePlus, FolderOpen, Play, RefreshCw, SearchCheck } from "lucide-react";
+import { open } from "@tauri-apps/plugin-dialog";
 
 import "./App.css";
 import { CandidateBundlePanel } from "./components/CandidateBundlePanel";
@@ -25,7 +26,7 @@ import type {
   ReviewTab,
 } from "./lib/types";
 
-type ActionName = "refresh" | "register" | "diagnose" | "analyze";
+type ActionName = "refresh" | "select" | "register" | "diagnose" | "analyze";
 
 function formatError(error: unknown): string {
   if (error instanceof Error) {
@@ -199,6 +200,20 @@ function App() {
     });
   }
 
+  async function handleSelectPdf() {
+    await runAction("select", async () => {
+      const selected = await open({
+        directory: false,
+        multiple: false,
+        filters: [{ name: "PDF", extensions: ["pdf"] }],
+      });
+
+      if (typeof selected === "string") {
+        setPathInput(selected);
+      }
+    });
+  }
+
   async function handleDiagnose() {
     await runAction("diagnose", async () => {
       setDiagnostic(await diagnoseOpenDataLoader());
@@ -244,6 +259,14 @@ function App() {
           void handleRegister();
         }}
       >
+        <button
+          disabled={isBusy}
+          onClick={() => void handleSelectPdf()}
+          type="button"
+        >
+          <FolderOpen aria-hidden="true" size={16} />
+          PDF 선택
+        </button>
         <input
           aria-label="PDF 경로"
           onChange={(event) => setPathInput(event.target.value)}

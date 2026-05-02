@@ -474,3 +474,25 @@ npm run test --prefix apps/rfp-desktop
 npm run build --prefix apps/rfp-desktop
 scripts/verify.sh
 ```
+
+### [x] 21. Add usable PDF file selection for document registration
+
+Done when:
+
+- The workbench has a `PDF 선택` button that opens a native file picker.
+- Selecting a PDF fills the absolute path input and enables `문서 추가`.
+- The selected path is registered through the existing `register_document_by_path` command.
+- The toolbar fits the default Tauri window without hiding primary actions.
+- Focused UI tests, full frontend tests/build, Rust tests, repository verification, and Tauri dev launch complete.
+
+Verification:
+
+```bash
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+scripts/verify.sh
+npm run tauri -- dev
+curl -I http://localhost:1420/
+```

@@ -6,9 +6,14 @@ import App from "./App";
 import { StatusBadge } from "./components/StatusBadge";
 
 const invokeMock = vi.fn();
+const openDialogMock = vi.fn();
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: (command: string, args?: unknown) => invokeMock(command, args),
+}));
+
+vi.mock("@tauri-apps/plugin-dialog", () => ({
+  open: (options?: unknown) => openDialogMock(options),
 }));
 
 const reviewFixture = {
@@ -197,6 +202,7 @@ const evidenceFixture = {
 
 beforeEach(() => {
   invokeMock.mockReset();
+  openDialogMock.mockReset();
   invokeMock.mockImplementation((command: string) => {
     if (command === "list_documents") {
       return Promise.resolve([
@@ -210,6 +216,18 @@ beforeEach(() => {
           blockCount: 37,
         },
       ]);
+    }
+
+    if (command === "register_document_by_path") {
+      return Promise.resolve({
+        id: "doc-2",
+        title: "월드비전 AI서비스 플랫폼 RFP",
+        status: "created",
+        fileName: "worldvision-rfp.pdf",
+        blockerCount: 0,
+        warningCount: 0,
+        blockCount: 0,
+      });
     }
 
     if (command === "run_fast_extraction") {
@@ -297,6 +315,7 @@ describe("App", () => {
       await screen.findByRole("heading", { name: "RFP 분석 작업대" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("PDF 경로")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /PDF 선택/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /문서 추가/ })).toBeDisabled();
     expect(screen.getByRole("button", { name: /진단/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /추출\/분석/ })).toBeInTheDocument();
@@ -307,6 +326,35 @@ describe("App", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("37")).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /개요/ })).toBeInTheDocument();
+  });
+
+  it("selects a PDF path and registers the document", async () => {
+    openDialogMock.mockResolvedValue("/tmp/worldvision-rfp.pdf");
+
+    render(<App />);
+
+    await screen.findByRole("heading", { name: "RFP 분석 작업대" });
+    fireEvent.click(screen.getByRole("button", { name: /PDF 선택/ }));
+
+    await waitFor(() => {
+      expect(openDialogMock).toHaveBeenCalledWith({
+        directory: false,
+        multiple: false,
+        filters: [{ name: "PDF", extensions: ["pdf"] }],
+      });
+    });
+
+    expect(screen.getByLabelText("PDF 경로")).toHaveValue(
+      "/tmp/worldvision-rfp.pdf",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /문서 추가/ }));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith("register_document_by_path", {
+        path: "/tmp/worldvision-rfp.pdf",
+      });
+    });
   });
 
   it("runs candidate analysis and renders project info and bundle counts", async () => {
