@@ -428,3 +428,29 @@ Secret scan:
 
 - Real provider key prefixes were scanned across source, migrations, smoke docs, and task/log docs.
 - Only fake test literals were present.
+
+## Priority 2: Review UI Implementation
+
+### [x] 19. Implement review UI vertical slice
+
+Done when:
+
+- Tauri exposes read-only review commands for the selected document's current project.
+- Review DTOs include overview fields, requirements, procurement BOM, staffing/MM, deliverables, acceptance criteria, risks, validation findings, metrics, and evidence context.
+- Review SQL uses parameterized queries and an evidence target allow-list.
+- Frontend loads review snapshots for the selected document without blocking the document list.
+- Korean review tabs show 개요, 구매 항목, 인력/MM, 요구사항, 산출물, 검수, and 리스크 rows.
+- Source evidence viewer opens from rows with evidence and shows quote, confidence, page/block metadata, optional bbox JSON, and neighboring source blocks.
+- Existing candidate summary UI remains available after candidate analysis.
+- Focused Rust tests, frontend tests/build, repository verification, and real PDF smoke complete.
+
+Verification:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::review
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```

@@ -169,6 +169,7 @@ fn load_field_evidence(conn: &Connection, field_id: &str) -> AppResult<Vec<Evide
     let evidence = statement
         .query_map([field_id], |row| {
             Ok(EvidenceLinkDto {
+                id: None,
                 document_block_id: row.get(0)?,
                 quote: row.get(1)?,
                 confidence: row.get(2)?,

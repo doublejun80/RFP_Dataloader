@@ -4,6 +4,7 @@ import type {
   CandidateExtractionSummary,
   DocumentSummary,
   DomainWriteSummary,
+  EvidenceContextDto,
   ExtractionRunSummary,
   LlmProvider,
   LlmRunSummary,
@@ -11,6 +12,7 @@ import type {
   LlmSettings,
   OpenDataLoaderDiagnostic,
   PipelineSummary,
+  ReviewProjectDto,
   SaveLlmSettingsRequest,
 } from "./types";
 
@@ -79,4 +81,18 @@ export function runLlmDomainAnalysis(
   documentId: string,
 ): Promise<DomainWriteSummary> {
   return invoke<DomainWriteSummary>("run_llm_domain_analysis", { documentId });
+}
+
+export function getReviewProject(documentId: string): Promise<ReviewProjectDto> {
+  return invoke<ReviewProjectDto>("get_review_project", { documentId });
+}
+
+export function getEvidenceContext(
+  targetTable: string,
+  targetId: string,
+): Promise<EvidenceContextDto> {
+  return invoke<EvidenceContextDto>("get_evidence_context", {
+    targetTable,
+    targetId,
+  });
 }

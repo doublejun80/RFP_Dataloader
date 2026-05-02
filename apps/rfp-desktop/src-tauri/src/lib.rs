@@ -41,7 +41,9 @@ pub fn run() {
             commands::llm::run_llm_structuring,
             commands::llm::run_llm_domain_analysis,
             commands::pipeline::analyze_document_baseline,
-            commands::pipeline::analyze_document_candidates
+            commands::pipeline::analyze_document_candidates,
+            commands::review::get_review_project,
+            commands::review::get_evidence_context
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

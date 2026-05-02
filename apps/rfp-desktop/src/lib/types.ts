@@ -45,6 +45,7 @@ export interface PipelineSummary {
 }
 
 export interface EvidenceLinkDto {
+  id?: string | null;
   documentBlockId: string;
   quote: string;
   confidence: number;
@@ -87,6 +88,167 @@ export interface QualityGateSummary {
   blockerCount: number;
   warningCount: number;
   blockCount: number;
+}
+
+export type ReviewTab =
+  | "overview"
+  | "procurement"
+  | "staffing"
+  | "requirements"
+  | "deliverables"
+  | "acceptance"
+  | "risks";
+
+export interface ReviewProjectDto {
+  document: DocumentSummary;
+  project?: ReviewProjectSummary | null;
+  overviewFields: ReviewFieldDto[];
+  requirements: RequirementReviewRow[];
+  procurementItems: ProcurementItemReviewRow[];
+  staffingRequirements: StaffingReviewRow[];
+  deliverables: DeliverableReviewRow[];
+  acceptanceCriteria: AcceptanceReviewRow[];
+  riskClauses: RiskReviewRow[];
+  findings: ValidationFindingDto[];
+  metrics: ReviewMetricsDto;
+}
+
+export interface ReviewProjectSummary {
+  id: string;
+  status: string;
+  summary: string;
+  analysisVersion: string;
+}
+
+export interface ReviewFieldDto {
+  id: string;
+  fieldKey: string;
+  label: string;
+  rawValue: string;
+  normalizedValue: string;
+  confidence: number;
+  source: string;
+  evidenceCount: number;
+}
+
+export interface RequirementReviewRow {
+  id: string;
+  requirementCode: string;
+  title: string;
+  description: string;
+  category: string;
+  mandatory: boolean;
+  confidence: number;
+  source: string;
+  evidenceCount: number;
+  blockerCount: number;
+  warningCount: number;
+}
+
+export interface ProcurementItemReviewRow {
+  id: string;
+  itemType: string;
+  name: string;
+  spec: string;
+  quantity?: number | null;
+  unit?: string | null;
+  required: boolean;
+  confidence: number;
+  requirementCode: string;
+  requirementTitle: string;
+  evidenceCount: number;
+  warningCount: number;
+}
+
+export interface StaffingReviewRow {
+  id: string;
+  role: string;
+  grade: string;
+  headcount?: number | null;
+  mm?: number | null;
+  onsite?: boolean | null;
+  periodText: string;
+  requirementCode: string;
+  requirementTitle: string;
+  evidenceCount: number;
+}
+
+export interface DeliverableReviewRow {
+  id: string;
+  name: string;
+  dueText: string;
+  formatText: string;
+  description: string;
+  confidence: number;
+  requirementCode: string;
+  requirementTitle: string;
+  evidenceCount: number;
+}
+
+export interface AcceptanceReviewRow {
+  id: string;
+  criterionType: string;
+  description: string;
+  threshold: string;
+  dueText: string;
+  confidence: number;
+  requirementCode: string;
+  requirementTitle: string;
+  evidenceCount: number;
+}
+
+export interface RiskReviewRow {
+  id: string;
+  riskType: string;
+  severity: string;
+  description: string;
+  recommendedAction: string;
+  requirementCode: string;
+  requirementTitle: string;
+  evidenceCount: number;
+}
+
+export interface ValidationFindingDto {
+  id: string;
+  severity: string;
+  findingType: string;
+  message: string;
+  targetTable?: string | null;
+  targetId?: string | null;
+  createdAt: string;
+}
+
+export interface ReviewMetricsDto {
+  requirementCount: number;
+  procurementCount: number;
+  staffingCount: number;
+  totalMm?: number | null;
+  highRiskCount: number;
+  blockerCount: number;
+  warningCount: number;
+}
+
+export interface EvidenceContextDto {
+  targetTable: string;
+  targetId: string;
+  evidence: EvidenceLinkDto[];
+  blocks: SourceBlockDto[];
+}
+
+export interface SourceBlockDto {
+  id: string;
+  pageNumber: number;
+  blockIndex: number;
+  kind: string;
+  text: string;
+  bboxJson?: string | null;
+  isDirectEvidence: boolean;
+}
+
+export interface EvidenceTarget {
+  targetTable: string;
+  targetId: string;
+  title: string;
 }
 
 export type LlmProvider = "openai" | "gemini";

@@ -13,6 +13,67 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 19: Review UI Implementation
+
+Completed task:
+
+- Implemented the review UI vertical slice from `docs/superpowers/plans/2026-05-02-review-ui-plan.md`, extended with the user-requested 산출물 and 검수 panels.
+- Added read-only Tauri review commands: `get_review_project` and `get_evidence_context`.
+- Added review DTOs for overview fields, requirements, procurement BOM, staffing/MM, deliverables, acceptance criteria, risks, findings, metrics, and source evidence context.
+- Added parameterized SQLite loaders with an evidence target allow-list for `rfp_fields`, `requirements`, `procurement_items`, `staffing_requirements`, `deliverables`, `acceptance_criteria`, and `risk_clauses`.
+- Added React review workbench tabs for 개요, 구매 항목, 인력/MM, 요구사항, 산출물, 검수, and 리스크.
+- Added source evidence viewer with direct quotes, confidence, page/block metadata, optional bbox JSON, direct evidence marking, and neighboring source blocks.
+- Kept existing candidate 기본정보 and 후보 묶음 panels available after candidate analysis.
+- Reduced global body minimum width and added horizontally scrollable dense review tables with responsive evidence layout.
+- Marked Priority 2 Task 19 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/src/commands/review.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/pipeline.rs`
+- `apps/rfp-desktop/src-tauri/src/domain.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `apps/rfp-desktop/src/components/review/`
+- `apps/rfp-desktop/src/App.tsx`
+- `apps/rfp-desktop/src/App.css`
+- `apps/rfp-desktop/src/App.test.tsx`
+- `apps/rfp-desktop/src/lib/api.ts`
+- `apps/rfp-desktop/src/lib/types.ts`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::review
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Result:
+
+- Focused review command tests passed: 2 tests.
+- Frontend App tests passed: 6 tests.
+- Full Rust tests passed: 48 passed and 2 live-provider tests ignored.
+- Frontend tests passed: 1 file and 6 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+- Real PDF smoke succeeded at extraction with `document_blocks=743`, `field_count=4`, `candidate_bundle_count=7`, `field_evidence_count=4`, `requirement_count=0`, `procurement_item_count=0`, `staffing_requirement_count=0`, `deliverable_count=0`, `acceptance_criteria_count=0`, `risk_clause_count=0`, `domain_evidence_count=0`, `llm_enabled=0`, `llm_offline_mode=1`, `llm_provider=openai`, `llm_run_count=0`, `review_needed_count=1`, `failed_count=0`, `blocker_count=3`, and `warning_count=1`.
+- Real PDF smoke returned exit code 2 by design because default LLM is disabled/offline and candidate-only blockers remain.
+
+Remaining task:
+
+- Next implementation wave should proceed to the export plan for Markdown, JSON, and Docx outputs from review snapshots.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 18: LLM Adapter Implementation
 
 Completed task:

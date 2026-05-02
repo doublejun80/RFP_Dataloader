@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FilePlus, Play, RefreshCw, SearchCheck } from "lucide-react";
 
 import "./App.css";
-import { BlockPreview } from "./components/BlockPreview";
 import { CandidateBundlePanel } from "./components/CandidateBundlePanel";
 import { DocumentList } from "./components/DocumentList";
 import { ProjectInfoPanel } from "./components/ProjectInfoPanel";
-import { QualityGate } from "./components/QualityGate";
-import { StatusBadge } from "./components/StatusBadge";
+import { ReviewWorkbench } from "./components/review/ReviewWorkbench";
 import {
   analyzeDocumentCandidates,
   diagnoseOpenDataLoader,
+  getEvidenceContext,
+  getReviewProject,
   listDocuments,
   registerDocumentByPath,
   runFastExtraction,
@@ -18,7 +18,11 @@ import {
 import type {
   CandidateExtractionSummary,
   DocumentSummary,
+  EvidenceContextDto,
+  EvidenceTarget,
   OpenDataLoaderDiagnostic,
+  ReviewProjectDto,
+  ReviewTab,
 } from "./lib/types";
 
 type ActionName = "refresh" | "register" | "diagnose" | "analyze";
@@ -52,8 +56,22 @@ function App() {
     useState<OpenDataLoaderDiagnostic | null>(null);
   const [candidateSummary, setCandidateSummary] =
     useState<CandidateExtractionSummary | null>(null);
+  const [review, setReview] = useState<ReviewProjectDto | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [activeReviewTab, setActiveReviewTab] =
+    useState<ReviewTab>("overview");
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+  const [evidenceTarget, setEvidenceTarget] =
+    useState<EvidenceTarget | null>(null);
+  const [evidenceContext, setEvidenceContext] =
+    useState<EvidenceContextDto | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<ActionName | null>(null);
+  const requestSeq = useRef(0);
+  const evidenceSeq = useRef(0);
 
   const selectedDocument = useMemo(
     () =>
@@ -62,14 +80,6 @@ function App() {
       null,
     [documents, selectedId],
   );
-
-  const selectedQuality = selectedDocument
-    ? {
-        blockerCount: selectedDocument.blockerCount,
-        warningCount: selectedDocument.warningCount,
-        blockCount: selectedDocument.blockCount,
-      }
-    : null;
 
   async function runAction<T>(
     action: ActionName,
@@ -106,7 +116,73 @@ function App() {
 
   useEffect(() => {
     setCandidateSummary(null);
+    setActiveReviewTab("overview");
+    setEvidenceTarget(null);
+    setEvidenceContext(null);
+    setEvidenceError(null);
   }, [selectedDocument?.id]);
+
+  useEffect(() => {
+    if (!selectedDocument) {
+      setReview(null);
+      setReviewError(null);
+      setReviewLoading(false);
+      return;
+    }
+
+    const seq = requestSeq.current + 1;
+    requestSeq.current = seq;
+    setReviewLoading(true);
+    setReviewError(null);
+
+    getReviewProject(selectedDocument.id)
+      .then((nextReview) => {
+        if (requestSeq.current === seq) {
+          setReview(nextReview);
+        }
+      })
+      .catch((nextError) => {
+        if (requestSeq.current === seq) {
+          setReviewError(formatError(nextError));
+        }
+      })
+      .finally(() => {
+        if (requestSeq.current === seq) {
+          setReviewLoading(false);
+        }
+      });
+  }, [selectedDocument, reviewRefreshKey]);
+
+  useEffect(() => {
+    if (!evidenceTarget) {
+      setEvidenceContext(null);
+      setEvidenceError(null);
+      setEvidenceLoading(false);
+      return;
+    }
+
+    const seq = evidenceSeq.current + 1;
+    evidenceSeq.current = seq;
+    setEvidenceLoading(true);
+    setEvidenceError(null);
+
+    getEvidenceContext(evidenceTarget.targetTable, evidenceTarget.targetId)
+      .then((nextContext) => {
+        if (evidenceSeq.current === seq) {
+          setEvidenceContext(nextContext);
+        }
+      })
+      .catch((nextError) => {
+        if (evidenceSeq.current === seq) {
+          setEvidenceError(formatError(nextError));
+        }
+      })
+      .finally(() => {
+        if (evidenceSeq.current === seq) {
+          setEvidenceLoading(false);
+        }
+      });
+  }, [evidenceTarget]);
 
   async function handleRegister() {
     const path = pathInput.trim();
@@ -138,6 +214,7 @@ function App() {
       await runFastExtraction(selectedDocument.id);
       setCandidateSummary(await analyzeDocumentCandidates(selectedDocument.id));
       await refreshDocuments();
+      setReviewRefreshKey((value) => value + 1);
     });
   }
 
@@ -217,31 +294,26 @@ function App() {
           selectedId={selectedDocument?.id ?? null}
         />
         <section className="detail">
-          {selectedDocument ? (
-            <div className="detail-heading">
-              <div>
-                <span className="eyeline">선택 문서</span>
-                <h2>{selectedDocument.title}</h2>
-              </div>
-              <StatusBadge status={selectedDocument.status} />
-            </div>
-          ) : (
-            <div className="detail-heading detail-heading--empty">
-              <div>
-                <span className="eyeline">선택 문서</span>
-                <h2>문서 없음</h2>
-              </div>
-            </div>
-          )}
-
-          <QualityGate summary={selectedQuality} />
+          <ReviewWorkbench
+            activeTab={activeReviewTab}
+            document={selectedDocument}
+            error={reviewError}
+            evidenceContext={evidenceContext}
+            evidenceError={evidenceError}
+            evidenceLoading={evidenceLoading}
+            evidenceTarget={evidenceTarget}
+            loading={reviewLoading}
+            onCloseEvidence={() => setEvidenceTarget(null)}
+            onOpenEvidence={setEvidenceTarget}
+            onTabChange={setActiveReviewTab}
+            review={review}
+          />
           {selectedDocument ? (
             <>
               <ProjectInfoPanel fields={candidateSummary?.fields ?? []} />
               <CandidateBundlePanel bundles={candidateSummary?.bundles ?? []} />
             </>
           ) : null}
-          <BlockPreview document={selectedDocument} />
         </section>
       </section>
     </main>
