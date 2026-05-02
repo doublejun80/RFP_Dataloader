@@ -13,6 +13,62 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 22: Candidate Visibility and LLM Structuring Controls
+
+Completed task:
+
+- Investigated the user's manual app run from the live app SQLite database.
+- Confirmed document registration and OpenDataLoader extraction were working: 2 documents, 2 succeeded extraction runs, 17,212 stored document blocks, 10 project-info fields, and 14 candidate bundles.
+- Identified the apparent empty extraction root cause: durable domain tables were empty because LLM structuring is disabled/offline by default (`enabled=0`, `offline_mode=1`) and no `llm_runs` had been executed.
+- Identified a UI visibility bug: persisted candidate bundles were stored in SQLite but not returned in review snapshots, so refresh/reopen made the app look emptier than the database was.
+- Extended review snapshots with persisted candidate bundle counts.
+- Updated the frontend to show persisted candidate bundles and project-info fields when no fresh candidate response exists in the current session.
+- Added an LLM structuring settings panel that shows disabled/offline/key/ready state, saves settings through the existing keychain-backed command, and only runs LLM domain analysis after explicit user action.
+- Did not make any live provider call during verification.
+- Marked Priority 2 Task 22 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/src/commands/review.rs`
+- `apps/rfp-desktop/src-tauri/src/domain.rs`
+- `apps/rfp-desktop/src/components/LlmSettingsPanel.tsx`
+- `apps/rfp-desktop/src/components/ProjectInfoPanel.tsx`
+- `apps/rfp-desktop/src/App.tsx`
+- `apps/rfp-desktop/src/App.css`
+- `apps/rfp-desktop/src/App.test.tsx`
+- `apps/rfp-desktop/src/lib/types.ts`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::review::tests::loads_review_project_with_domain_rows_and_metrics
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```
+
+Result:
+
+- Focused review command test passed.
+- Focused App tests passed: 9 tests.
+- Full Rust tests passed: 48 passed and 2 live-provider tests ignored.
+- Full frontend tests passed: 1 file and 9 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+
+Remaining task:
+
+- For fully populated requirements/BOM/MM/deliverables/acceptance/risks, the user must explicitly enable LLM structuring with a provider key and run `LLM 구조화 실행`, or a future offline deterministic domain extractor needs to be implemented.
+- Next implementation wave can proceed to export once the desired structuring path is confirmed.
+
+Blockers:
+
+- No code blocker. Live provider structuring requires explicit user opt-in because it transmits candidate text to OpenAI/Gemini and may spend provider credits.
+
 ### 2026-05-02 - Task 21: PDF File Selection UX Fix
 
 Completed task:

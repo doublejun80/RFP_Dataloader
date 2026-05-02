@@ -24,7 +24,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -65,10 +66,21 @@ input {
 }
 
 input:focus,
+select:focus,
 button:focus-visible {
   border-color: #3267a8;
   outline: 2px solid rgba(50, 103, 168, 0.18);
   outline-offset: 1px;
+}
+
+select {
+  background: #ffffff;
+  border: 1px solid #c5cdd8;
+  border-radius: 6px;
+  color: #1f2933;
+  min-height: 36px;
+  min-width: 0;
+  padding: 0 10px;
 }
 
 .workspace {
@@ -247,6 +259,7 @@ button:focus-visible {
 .block-preview,
 .project-info,
 .candidate-bundles,
+.llm-panel,
 .diagnostic,
 .error-banner {
   background: #ffffff;
@@ -318,9 +331,73 @@ button:focus-visible {
 }
 
 .project-info,
-.candidate-bundles {
+.candidate-bundles,
+.llm-panel {
   display: grid;
   gap: 12px;
+}
+
+.llm-panel-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.llm-panel h3 {
+  align-items: center;
+  color: #111827;
+  display: flex;
+  font-size: 16px;
+  gap: 6px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.llm-panel p {
+  color: #5e6978;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+.llm-controls {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto auto minmax(110px, 140px) minmax(140px, 1fr) minmax(180px, 1fr) auto;
+}
+
+.llm-toggle {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  min-height: 36px;
+}
+
+.llm-toggle input {
+  min-height: auto;
+}
+
+.llm-field {
+  display: grid;
+  gap: 4px;
+}
+
+.llm-field span,
+.llm-toggle span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.llm-key-status {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.llm-error {
+  color: #8a2119;
 }
 
 .project-info-grid {
@@ -736,6 +813,20 @@ button:focus-visible {
 
   .toolbar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .llm-panel-header {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .llm-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .llm-field--key {
+    grid-column: 1 / -1;
   }
 
   .toolbar input {

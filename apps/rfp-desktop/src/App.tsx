@@ -5,28 +5,41 @@ import { open } from "@tauri-apps/plugin-dialog";
 import "./App.css";
 import { CandidateBundlePanel } from "./components/CandidateBundlePanel";
 import { DocumentList } from "./components/DocumentList";
+import { LlmSettingsPanel } from "./components/LlmSettingsPanel";
 import { ProjectInfoPanel } from "./components/ProjectInfoPanel";
 import { ReviewWorkbench } from "./components/review/ReviewWorkbench";
 import {
   analyzeDocumentCandidates,
   diagnoseOpenDataLoader,
   getEvidenceContext,
+  getLlmSettings,
   getReviewProject,
   listDocuments,
   registerDocumentByPath,
   runFastExtraction,
+  runLlmDomainAnalysis,
+  saveLlmSettings,
 } from "./lib/api";
 import type {
   CandidateExtractionSummary,
   DocumentSummary,
   EvidenceContextDto,
   EvidenceTarget,
+  LlmSettings,
   OpenDataLoaderDiagnostic,
   ReviewProjectDto,
   ReviewTab,
+  SaveLlmSettingsRequest,
 } from "./lib/types";
 
-type ActionName = "refresh" | "select" | "register" | "diagnose" | "analyze";
+type ActionName =
+  | "refresh"
+  | "select"
+  | "register"
+  | "diagnose"
+  | "analyze"
+  | "llm-settings"
+  | "llm-run";
 
 function formatError(error: unknown): string {
   if (error instanceof Error) {
@@ -58,6 +71,8 @@ function App() {
   const [candidateSummary, setCandidateSummary] =
     useState<CandidateExtractionSummary | null>(null);
   const [review, setReview] = useState<ReviewProjectDto | null>(null);
+  const [llmSettings, setLlmSettings] = useState<LlmSettings | null>(null);
+  const [llmError, setLlmError] = useState<string | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [activeReviewTab, setActiveReviewTab] =
@@ -113,6 +128,17 @@ function App() {
 
   useEffect(() => {
     void runAction("refresh", refreshDocuments);
+  }, []);
+
+  useEffect(() => {
+    getLlmSettings()
+      .then((settings) => {
+        setLlmSettings(settings);
+        setLlmError(null);
+      })
+      .catch((nextError) => {
+        setLlmError(formatError(nextError));
+      });
   }, []);
 
   useEffect(() => {
@@ -233,7 +259,28 @@ function App() {
     });
   }
 
+  async function handleSaveLlmSettings(request: SaveLlmSettingsRequest) {
+    await runAction("llm-settings", async () => {
+      setLlmSettings(await saveLlmSettings(request));
+      setLlmError(null);
+    });
+  }
+
+  async function handleRunLlmDomainAnalysis() {
+    if (!selectedDocument) {
+      return;
+    }
+
+    await runAction("llm-run", async () => {
+      await runLlmDomainAnalysis(selectedDocument.id);
+      await refreshDocuments();
+      setReviewRefreshKey((value) => value + 1);
+    });
+  }
+
   const isBusy = pendingAction !== null;
+  const visibleFields = candidateSummary?.fields ?? review?.overviewFields ?? [];
+  const visibleBundles = candidateSummary?.bundles ?? review?.candidateBundles ?? [];
 
   return (
     <main className="workspace">
@@ -317,6 +364,14 @@ function App() {
           selectedId={selectedDocument?.id ?? null}
         />
         <section className="detail">
+          <LlmSettingsPanel
+            document={selectedDocument}
+            error={llmError}
+            loading={isBusy}
+            onRun={() => void handleRunLlmDomainAnalysis()}
+            onSave={(request) => void handleSaveLlmSettings(request)}
+            settings={llmSettings}
+          />
           <ReviewWorkbench
             activeTab={activeReviewTab}
             document={selectedDocument}
@@ -333,8 +388,8 @@ function App() {
           />
           {selectedDocument ? (
             <>
-              <ProjectInfoPanel fields={candidateSummary?.fields ?? []} />
-              <CandidateBundlePanel bundles={candidateSummary?.bundles ?? []} />
+              <ProjectInfoPanel fields={visibleFields} />
+              <CandidateBundlePanel bundles={visibleBundles} />
             </>
           ) : null}
         </section>

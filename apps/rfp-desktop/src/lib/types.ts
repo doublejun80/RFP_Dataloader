@@ -103,6 +103,7 @@ export interface ReviewProjectDto {
   document: DocumentSummary;
   project?: ReviewProjectSummary | null;
   overviewFields: ReviewFieldDto[];
+  candidateBundles: CandidateBundleSummaryDto[];
   requirements: RequirementReviewRow[];
   procurementItems: ProcurementItemReviewRow[];
   staffingRequirements: StaffingReviewRow[];

@@ -1,4 +1,4 @@
-import type { RfpFieldDto } from "../lib/types";
+import type { ReviewFieldDto, RfpFieldDto } from "../lib/types";
 
 const FIELD_ORDER = [
   ["business_name", "사업명"],
@@ -10,7 +10,7 @@ const FIELD_ORDER = [
 ] as const;
 
 interface ProjectInfoPanelProps {
-  fields: RfpFieldDto[];
+  fields: Array<RfpFieldDto | ReviewFieldDto>;
 }
 
 export function ProjectInfoPanel({ fields }: ProjectInfoPanelProps) {

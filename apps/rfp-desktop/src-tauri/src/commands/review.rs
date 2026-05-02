@@ -3,10 +3,10 @@ use tauri::State;
 
 use crate::document_ingestion;
 use crate::domain::{
-    AcceptanceReviewRow, DeliverableReviewRow, EvidenceContextDto, EvidenceLinkDto,
-    ProcurementItemReviewRow, RequirementReviewRow, ReviewFieldDto, ReviewMetricsDto,
-    ReviewProjectDto, ReviewProjectSummary, RiskReviewRow, SourceBlockDto, StaffingReviewRow,
-    ValidationFindingDto,
+    AcceptanceReviewRow, CandidateBundleSummaryDto, DeliverableReviewRow, EvidenceContextDto,
+    EvidenceLinkDto, ProcurementItemReviewRow, RequirementReviewRow, ReviewFieldDto,
+    ReviewMetricsDto, ReviewProjectDto, ReviewProjectSummary, RiskReviewRow, SourceBlockDto,
+    StaffingReviewRow, ValidationFindingDto,
 };
 use crate::error::{AppError, AppResult};
 use crate::state::AppState;
@@ -49,6 +49,7 @@ fn load_review_project(conn: &Connection, document_id: &str) -> AppResult<Review
             document,
             project: None,
             overview_fields: Vec::new(),
+            candidate_bundles: Vec::new(),
             requirements: Vec::new(),
             procurement_items: Vec::new(),
             staffing_requirements: Vec::new(),
@@ -69,6 +70,7 @@ fn load_review_project(conn: &Connection, document_id: &str) -> AppResult<Review
     };
 
     let overview_fields = load_overview_fields(conn, &project.id)?;
+    let candidate_bundles = load_candidate_bundles(conn, &project.id)?;
     let requirements = load_requirements(conn, &project.id)?;
     let procurement_items = load_procurement_items(conn, &project.id)?;
     let staffing_requirements = load_staffing_requirements(conn, &project.id)?;
@@ -88,6 +90,7 @@ fn load_review_project(conn: &Connection, document_id: &str) -> AppResult<Review
         document,
         project: Some(project),
         overview_fields,
+        candidate_bundles,
         requirements,
         procurement_items,
         staffing_requirements,
@@ -97,6 +100,36 @@ fn load_review_project(conn: &Connection, document_id: &str) -> AppResult<Review
         findings,
         metrics,
     })
+}
+
+fn load_candidate_bundles(
+    conn: &Connection,
+    project_id: &str,
+) -> AppResult<Vec<CandidateBundleSummaryDto>> {
+    let mut statement = conn.prepare(
+        "SELECT bundle_key, candidate_count
+         FROM candidate_bundles
+         WHERE rfp_project_id = ?
+         ORDER BY CASE bundle_key
+           WHEN 'project_info_candidates' THEN 1
+           WHEN 'requirement_candidates' THEN 2
+           WHEN 'procurement_candidates' THEN 3
+           WHEN 'staffing_candidates' THEN 4
+           WHEN 'deliverable_candidates' THEN 5
+           WHEN 'acceptance_candidates' THEN 6
+           WHEN 'risk_candidates' THEN 7
+           ELSE 99
+         END",
+    )?;
+    let rows = statement
+        .query_map([project_id], |row| {
+            Ok(CandidateBundleSummaryDto {
+                bundle_key: row.get(0)?,
+                candidate_count: row.get(1)?,
+            })
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(rows)
 }
 
 fn load_project_summary(
@@ -644,6 +677,12 @@ mod tests {
             "review_needed"
         );
         assert_eq!(review.overview_fields.len(), 2);
+        assert_eq!(review.candidate_bundles.len(), 2);
+        assert_eq!(
+            review.candidate_bundles[0].bundle_key,
+            "project_info_candidates"
+        );
+        assert_eq!(review.candidate_bundles[0].candidate_count, 4);
         assert_eq!(review.requirements[0].requirement_code, "SFR-001");
         assert_eq!(review.procurement_items[0].name, "API Gateway");
         assert_eq!(review.staffing_requirements[0].mm, Some(3.0));
@@ -712,6 +751,11 @@ mod tests {
             VALUES
                 ('field-1', 'project-1', 'business_name', '사업명', 'API 고도화 사업', 'API 고도화 사업', 0.91, 'llm', '2026-05-02T00:00:00Z', '2026-05-02T00:00:00Z'),
                 ('field-2', 'project-1', 'client', '발주기관', '서울시', '서울시', 0.88, 'llm', '2026-05-02T00:00:00Z', '2026-05-02T00:00:00Z');
+
+            INSERT INTO candidate_bundles (id, rfp_project_id, document_id, bundle_key, bundle_json, candidate_count, created_at)
+            VALUES
+                ('bundle-1', 'project-1', 'doc-1', 'project_info_candidates', '{}', 4, '2026-05-02T00:00:00Z'),
+                ('bundle-2', 'project-1', 'doc-1', 'requirement_candidates', '{}', 7, '2026-05-02T00:00:00Z');
 
             INSERT INTO requirements (
                 id, rfp_project_id, requirement_code, title, description, category, mandatory, confidence, source, created_at, updated_at

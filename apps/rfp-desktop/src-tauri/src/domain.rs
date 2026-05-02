@@ -92,6 +92,7 @@ pub struct ReviewProjectDto {
     pub document: DocumentSummary,
     pub project: Option<ReviewProjectSummary>,
     pub overview_fields: Vec<ReviewFieldDto>,
+    pub candidate_bundles: Vec<CandidateBundleSummaryDto>,
     pub requirements: Vec<RequirementReviewRow>,
     pub procurement_items: Vec<ProcurementItemReviewRow>,
     pub staffing_requirements: Vec<StaffingReviewRow>,

@@ -127,6 +127,11 @@ const reviewFixture = {
       evidenceCount: 1,
     },
   ],
+  candidateBundles: [
+    { bundleKey: "project_info_candidates", candidateCount: 4 },
+    { bundleKey: "requirement_candidates", candidateCount: 80 },
+    { bundleKey: "procurement_candidates", candidateCount: 64 },
+  ],
   findings: [
     {
       id: "finding-1",
@@ -290,6 +295,42 @@ beforeEach(() => {
       return Promise.resolve(evidenceFixture);
     }
 
+    if (command === "get_llm_settings") {
+      return Promise.resolve({
+        enabled: false,
+        offlineMode: true,
+        provider: "openai",
+        model: "",
+        apiKeyConfigured: false,
+      });
+    }
+
+    if (command === "save_llm_settings") {
+      return Promise.resolve({
+        enabled: true,
+        offlineMode: false,
+        provider: "openai",
+        model: "gpt-4.1-mini",
+        apiKeyConfigured: true,
+      });
+    }
+
+    if (command === "run_llm_domain_analysis") {
+      return Promise.resolve({
+        rfpProjectId: "project-1",
+        fieldsWritten: 1,
+        requirementsWritten: 1,
+        procurementItemsWritten: 1,
+        staffingRequirementsWritten: 0,
+        deliverablesWritten: 0,
+        acceptanceCriteriaWritten: 0,
+        riskClausesWritten: 0,
+        evidenceLinksWritten: 3,
+        rejectedRecords: 0,
+        rejections: [],
+      });
+    }
+
     return Promise.resolve(null);
   });
 });
@@ -326,6 +367,51 @@ describe("App", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("37")).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /개요/ })).toBeInTheDocument();
+  });
+
+  it("shows persisted candidate bundles and disabled LLM state after refresh", async () => {
+    render(<App />);
+
+    expect(await screen.findByText("후보 묶음")).toBeInTheDocument();
+    expect(screen.getAllByText("요구사항").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("80")).toBeInTheDocument();
+    expect(await screen.findByText("LLM 구조화 꺼짐")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /LLM 구조화 실행/ })).toBeDisabled();
+  });
+
+  it("saves LLM settings and runs domain analysis only after explicit action", async () => {
+    render(<App />);
+
+    await screen.findByText("LLM 구조화 꺼짐");
+    fireEvent.click(screen.getByLabelText("LLM 사용"));
+    fireEvent.click(screen.getByLabelText("오프라인 모드"));
+    fireEvent.change(screen.getByLabelText("LLM 모델"), {
+      target: { value: "gpt-4.1-mini" },
+    });
+    fireEvent.change(screen.getByLabelText("API 키"), {
+      target: { value: "sk-test-local" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /LLM 설정 저장/ }));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith("save_llm_settings", {
+        request: {
+          enabled: true,
+          offlineMode: false,
+          provider: "openai",
+          model: "gpt-4.1-mini",
+          apiKey: "sk-test-local",
+        },
+      });
+    });
+
+    fireEvent.click(await screen.findByRole("button", { name: /LLM 구조화 실행/ }));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith("run_llm_domain_analysis", {
+        documentId: "doc-1",
+      });
+    });
   });
 
   it("selects a PDF path and registers the document", async () => {
@@ -386,7 +472,7 @@ describe("App", () => {
     render(<App />);
 
     expect(await screen.findByRole("button", { name: /개요/ })).toBeInTheDocument();
-    expect(screen.getByText("서울시 통합 유지관리 사업")).toBeInTheDocument();
+    expect(screen.getAllByText("서울시 통합 유지관리 사업").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("사업예산이 추출되지 않았습니다.")).toBeInTheDocument();
     expect(invokeMock).toHaveBeenCalledWith("get_review_project", {
       documentId: "doc-1",

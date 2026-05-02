@@ -496,3 +496,27 @@ scripts/verify.sh
 npm run tauri -- dev
 curl -I http://localhost:1420/
 ```
+
+### [x] 22. Surface candidate-only analysis state and LLM structuring controls
+
+Done when:
+
+- The app diagnosis explains the apparent empty extraction state from persisted data.
+- Review snapshots include persisted candidate bundle counts so refresh/reopen does not make candidate extraction look empty.
+- The frontend shows persisted candidate bundles and project-info fields even when the current session has no fresh candidate response.
+- The frontend shows whether LLM structuring is disabled/offline/missing a key/ready.
+- LLM settings can be saved explicitly through the existing keychain-backed command.
+- LLM domain analysis can only be started from an explicit user action when settings are enabled, online, and API key configured.
+- No live provider call is made during verification.
+- Focused Rust/UI tests, full frontend tests/build, Rust tests, and repository verification pass.
+
+Verification:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::review::tests::loads_review_project_with_domain_rows_and_metrics
+npm run test --prefix apps/rfp-desktop -- --run App.test.tsx
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+```
