@@ -87,6 +87,13 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
         [],
         |row| row.get(0),
     )?;
+    let (llm_enabled, llm_offline_mode, llm_provider): (i64, i64, String) = conn.query_row(
+        "SELECT enabled, offline_mode, provider FROM llm_settings WHERE id = 1",
+        [],
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+    )?;
+    let llm_run_count: i64 =
+        conn.query_row("SELECT COUNT(*) FROM llm_runs", [], |row| row.get(0))?;
     let ready_count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM documents WHERE status = 'ready'",
         [],
@@ -127,6 +134,10 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
     println!("acceptance_criteria_count={acceptance_criteria_count}");
     println!("risk_clause_count={risk_clause_count}");
     println!("domain_evidence_count={domain_evidence_count}");
+    println!("llm_enabled={llm_enabled}");
+    println!("llm_offline_mode={llm_offline_mode}");
+    println!("llm_provider={llm_provider}");
+    println!("llm_run_count={llm_run_count}");
     println!("ready_count={ready_count}");
     println!("review_needed_count={review_needed_count}");
     println!("failed_count={failed_count}");

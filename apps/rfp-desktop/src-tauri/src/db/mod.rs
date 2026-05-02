@@ -8,6 +8,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../migrations/0001_core.sql"),
     include_str!("../../migrations/0002_candidate_extractor.sql"),
     include_str!("../../migrations/0003_domain_writer.sql"),
+    include_str!("../../migrations/0004_llm.sql"),
 ];
 
 pub fn open_database(path: &Path) -> AppResult<Connection> {
@@ -280,6 +281,35 @@ mod tests {
             )
             .expect("count domain tables");
         assert_eq!(table_count, 8);
+    }
+
+    #[test]
+    fn migrates_llm_tables_and_default_settings() {
+        let conn = Connection::open_in_memory().expect("open memory db");
+
+        migrate(&conn).expect("run migrations");
+
+        let table_count: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN (
+                    'llm_runs',
+                    'llm_settings'
+                )",
+                [],
+                |row| row.get(0),
+            )
+            .expect("count tables");
+        assert_eq!(table_count, 2);
+
+        let (enabled, offline_mode): (i64, i64) = conn
+            .query_row(
+                "SELECT enabled, offline_mode FROM llm_settings WHERE id = 1",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .expect("default settings");
+        assert_eq!(enabled, 0);
+        assert_eq!(offline_mode, 1);
     }
 
     #[test]

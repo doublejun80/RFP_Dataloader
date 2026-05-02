@@ -3,9 +3,15 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   CandidateExtractionSummary,
   DocumentSummary,
+  DomainWriteSummary,
   ExtractionRunSummary,
+  LlmProvider,
+  LlmRunSummary,
+  LlmSchemaName,
+  LlmSettings,
   OpenDataLoaderDiagnostic,
   PipelineSummary,
+  SaveLlmSettingsRequest,
 } from "./types";
 
 export function listDocuments(): Promise<DocumentSummary[]> {
@@ -43,4 +49,34 @@ export function analyzeDocumentCandidates(
   return invoke<CandidateExtractionSummary>("analyze_document_candidates", {
     documentId,
   });
+}
+
+export function getLlmSettings(): Promise<LlmSettings> {
+  return invoke<LlmSettings>("get_llm_settings");
+}
+
+export function saveLlmSettings(
+  request: SaveLlmSettingsRequest,
+): Promise<LlmSettings> {
+  return invoke<LlmSettings>("save_llm_settings", { request });
+}
+
+export function clearLlmApiKey(provider: LlmProvider): Promise<LlmSettings> {
+  return invoke<LlmSettings>("clear_llm_api_key", { provider });
+}
+
+export function runLlmStructuring(
+  documentId: string,
+  schemaName: LlmSchemaName,
+): Promise<LlmRunSummary> {
+  return invoke<LlmRunSummary>("run_llm_structuring", {
+    documentId,
+    schemaName,
+  });
+}
+
+export function runLlmDomainAnalysis(
+  documentId: string,
+): Promise<DomainWriteSummary> {
+  return invoke<DomainWriteSummary>("run_llm_domain_analysis", { documentId });
 }

@@ -24,6 +24,10 @@ Expected report fields:
 - acceptance_criteria_count
 - risk_clause_count
 - domain_evidence_count
+- llm_enabled
+- llm_offline_mode
+- llm_provider
+- llm_run_count
 - ready_count
 - review_needed_count
 - failed_count
@@ -57,4 +61,12 @@ domain_evidence_count=<evidence links for durable domain rows>
 ```
 
 The current candidate-only smoke path may report zero for the domain writer counts until
-a deterministic candidate-to-`DomainDraft` adapter or LLM adapter feeds the writer.
+a deterministic candidate-to-`DomainDraft` adapter or an opt-in LLM domain analysis command feeds
+the writer.
+
+LLM adapter expectations:
+
+- Default `llm_settings` are disabled and offline.
+- Normal `scripts/verify.sh` and this smoke command do not require OpenAI or Gemini keys.
+- API keys must be supplied through the settings command/keychain or environment variables; they are not stored in SQLite plaintext.
+- Live provider roundtrips are covered by ignored Rust tests and should only be run with explicit `OPENAI_API_KEY` or `GEMINI_API_KEY` environment variables.

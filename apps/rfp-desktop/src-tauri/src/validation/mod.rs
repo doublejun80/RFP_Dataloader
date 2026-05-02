@@ -194,6 +194,24 @@ pub fn insert_domain_rejections(
     Ok(())
 }
 
+pub fn insert_llm_rejection_finding(
+    conn: &Connection,
+    rfp_project_id: &str,
+    finding_type: &str,
+    message: &str,
+) -> AppResult<()> {
+    insert_finding_values(
+        conn,
+        rfp_project_id,
+        "blocker",
+        finding_type,
+        message,
+        Some("rfp_projects"),
+        Some(rfp_project_id.to_string()),
+    )?;
+    refresh_project_status_from_findings(conn, rfp_project_id)
+}
+
 pub fn refresh_project_status_from_findings(
     conn: &Connection,
     rfp_project_id: &str,

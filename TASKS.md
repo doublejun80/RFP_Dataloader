@@ -391,3 +391,40 @@ npm run test --prefix apps/rfp-desktop
 npm run build --prefix apps/rfp-desktop
 cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
 ```
+
+## Priority 2: LLM Adapter Implementation
+
+### [x] 18. Implement LLM adapter vertical slice
+
+Done when:
+
+- SQLite migration exists for `llm_settings` and `llm_runs`, with default disabled/offline settings.
+- Rust LLM contracts exist for candidate-only input envelopes, schema names, provider settings, and run summaries.
+- JSON Schemas exist for project info, requirements, procurement/domain arrays, and risk classification.
+- Schema validation and evidence validation reject malformed outputs, empty evidence arrays, and unknown candidate block IDs.
+- API keys are stored through an OS keychain boundary with environment-variable fallback and are not persisted in SQLite plaintext.
+- OpenAI and Gemini provider adapters build structured-output requests through fake transports without leaking API keys into request snapshots.
+- Runner persists `succeeded`, `failed`, and `rejected` `llm_runs`, retries transient provider statuses, and records schema/evidence rejection findings.
+- Candidate bundles can be converted into provider input envelopes without file paths or raw JSON.
+- Validated provider outputs can be converted into `DomainDraft` and connected to a Tauri LLM domain analysis command.
+- Frontend DTO/API wrappers compile for settings, single-schema LLM runs, and LLM domain analysis.
+- Smoke output reports default LLM disabled/offline state and run count.
+- Focused Rust tests, full Rust tests, repository verification, frontend tests/build, secret scan, and real PDF smoke complete.
+
+Verification:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests::migrates_llm_tables_and_default_settings
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::llm::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Secret scan:
+
+- Real provider key prefixes were scanned across source, migrations, smoke docs, and task/log docs.
+- Only fake test literals were present.

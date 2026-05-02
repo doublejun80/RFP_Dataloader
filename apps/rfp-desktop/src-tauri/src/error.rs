@@ -14,6 +14,14 @@ pub enum AppError {
     ExternalCommand(String),
     #[error("application path unavailable: {0}")]
     Path(String),
+    #[error("llm disabled: {0}")]
+    LlmDisabled(String),
+    #[error("llm provider error: {0}")]
+    LlmProvider(String),
+    #[error("llm schema rejected: {0}")]
+    LlmRejected(String),
+    #[error("secret storage error: {0}")]
+    Secret(String),
 }
 
 #[derive(Serialize)]
@@ -25,6 +33,10 @@ enum AppErrorDto {
     InvalidInput(String),
     ExternalCommand(String),
     Path(String),
+    LlmDisabled(String),
+    LlmProvider(String),
+    LlmRejected(String),
+    Secret(String),
 }
 
 impl Serialize for AppError {
@@ -39,6 +51,10 @@ impl Serialize for AppError {
             AppError::InvalidInput(message) => AppErrorDto::InvalidInput(message.clone()),
             AppError::ExternalCommand(message) => AppErrorDto::ExternalCommand(message.clone()),
             AppError::Path(message) => AppErrorDto::Path(message.clone()),
+            AppError::LlmDisabled(message) => AppErrorDto::LlmDisabled(message.clone()),
+            AppError::LlmProvider(message) => AppErrorDto::LlmProvider(message.clone()),
+            AppError::LlmRejected(message) => AppErrorDto::LlmRejected(message.clone()),
+            AppError::Secret(message) => AppErrorDto::Secret(message.clone()),
         };
         dto.serialize(serializer)
     }

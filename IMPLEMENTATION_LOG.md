@@ -13,6 +13,79 @@ This log keeps Codex sessions continuous. After each completed work cycle, updat
 
 ## Latest Entry
 
+### 2026-05-02 - Task 18: LLM Adapter Implementation
+
+Completed task:
+
+- Implemented the LLM adapter vertical slice from `docs/superpowers/plans/2026-05-02-llm-adapter-plan.md`, adapted to the existing migration sequence as `0004_llm.sql`.
+- Added durable `llm_settings` and `llm_runs` tables with default disabled/offline settings.
+- Added provider-neutral LLM DTOs for candidate-only input envelopes, schema names, providers, structured responses, settings, and run summaries.
+- Added JSON Schema builders for project info, requirements, procurement/domain arrays, and risk classification.
+- Added local schema validation and evidence block validation before output can be used for domain writing.
+- Added keychain-backed secret boundary with environment-variable fallback and no SQLite plaintext API key storage.
+- Added OpenAI Responses API and Gemini generateContent adapters behind fake-testable HTTP transport.
+- Added LLM runner persistence with retryable transient status handling, rejected/failed/succeeded `llm_runs`, and `schema_invalid`/`missing_evidence` findings.
+- Added candidate bundle to provider input envelope loading without source file paths or raw JSON.
+- Added provider output to `DomainDraft` bridge and Tauri commands for settings, single-schema structuring, and LLM domain analysis.
+- Added TypeScript DTO/API wrappers for LLM settings, run summaries, and domain analysis.
+- Added ignored live-provider roundtrip tests for explicit OpenAI/Gemini opt-in.
+- Updated smoke output and smoke README with LLM disabled/offline/run-count reporting.
+- Added dependencies: `reqwest` for HTTPS provider transport, `jsonschema` for local schema validation, and `keyring`/`keyring-core` for OS keychain API-key storage.
+- Marked Priority 2 Task 18 complete.
+
+Files changed:
+
+- `apps/rfp-desktop/src-tauri/migrations/0004_llm.sql`
+- `apps/rfp-desktop/src-tauri/Cargo.toml`
+- `apps/rfp-desktop/src-tauri/Cargo.lock`
+- `apps/rfp-desktop/src-tauri/src/llm_adapter/`
+- `apps/rfp-desktop/src-tauri/src/commands/llm.rs`
+- `apps/rfp-desktop/src-tauri/src/commands/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/db/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/error.rs`
+- `apps/rfp-desktop/src-tauri/src/lib.rs`
+- `apps/rfp-desktop/src-tauri/src/validation/mod.rs`
+- `apps/rfp-desktop/src-tauri/src/bin/smoke_first_pdf.rs`
+- `apps/rfp-desktop/src/lib/api.ts`
+- `apps/rfp-desktop/src/lib/types.ts`
+- `tests/smoke/README.md`
+- `TASKS.md`
+- `IMPLEMENTATION_LOG.md`
+
+Verification command:
+
+```bash
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml db::tests::migrates_llm_tables_and_default_settings
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml llm_adapter::
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml commands::llm::tests
+cargo test --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml
+npm run test --prefix apps/rfp-desktop
+npm run build --prefix apps/rfp-desktop
+scripts/verify.sh
+cargo run --manifest-path apps/rfp-desktop/src-tauri/Cargo.toml --bin smoke_first_pdf -- "rfp/rfp_bundle/05_AI/18_월드비전_AI서비스_플랫폼_구축_제안요청서.pdf"
+```
+
+Result:
+
+- Focused LLM migration test passed.
+- Focused LLM adapter tests passed: 17 passed and 2 live-provider tests ignored by default.
+- Focused LLM command envelope test passed.
+- Full Rust tests passed: 46 passed and 2 ignored.
+- Frontend tests passed: 1 file and 3 tests.
+- Frontend build passed.
+- `scripts/verify.sh` passed with Rust tests, frontend tests, frontend build, and smoke binary build.
+- Secret scan found no real OpenAI/Gemini key material in source, migrations, smoke docs, task docs, or implementation log; only fake test literals were present.
+- Real PDF smoke succeeded at extraction with `document_blocks=743`, `field_count=4`, `candidate_bundle_count=7`, `field_evidence_count=4`, `requirement_count=0`, `procurement_item_count=0`, `staffing_requirement_count=0`, `deliverable_count=0`, `acceptance_criteria_count=0`, `risk_clause_count=0`, `domain_evidence_count=0`, `llm_enabled=0`, `llm_offline_mode=1`, `llm_provider=openai`, `llm_run_count=0`, `review_needed_count=1`, `failed_count=0`, `blocker_count=3`, and `warning_count=1`.
+- Real PDF smoke returned exit code 2 by design because default LLM is disabled/offline and candidate-only blockers remain.
+
+Remaining task:
+
+- Next implementation wave can proceed to the review UI plan or export plan. Live provider smoke remains opt-in and should only be run when the user explicitly wants to spend provider credits and send candidate text.
+
+Blockers:
+
+- None.
+
 ### 2026-05-02 - Task 17: Domain Writer Implementation
 
 Completed task:

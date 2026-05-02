@@ -15,6 +15,7 @@ pub mod document_ingestion;
 pub mod domain;
 pub mod domain_writer;
 pub mod error;
+pub mod llm_adapter;
 pub mod opendataloader_adapter;
 mod state;
 mod validation;
@@ -34,6 +35,11 @@ pub fn run() {
             commands::documents::list_documents,
             commands::extraction::diagnose_opendataloader,
             commands::extraction::run_fast_extraction,
+            commands::llm::get_llm_settings,
+            commands::llm::save_llm_settings,
+            commands::llm::clear_llm_api_key,
+            commands::llm::run_llm_structuring,
+            commands::llm::run_llm_domain_analysis,
             commands::pipeline::analyze_document_baseline,
             commands::pipeline::analyze_document_candidates
         ])

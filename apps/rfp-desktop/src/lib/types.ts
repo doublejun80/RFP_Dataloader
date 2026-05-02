@@ -88,3 +88,60 @@ export interface QualityGateSummary {
   warningCount: number;
   blockCount: number;
 }
+
+export type LlmProvider = "openai" | "gemini";
+export type LlmSchemaName =
+  | "project_info"
+  | "requirements"
+  | "procurement"
+  | "risk_classification";
+
+export interface LlmSettings {
+  enabled: boolean;
+  offlineMode: boolean;
+  provider: LlmProvider;
+  model: string;
+  apiKeyConfigured: boolean;
+}
+
+export interface SaveLlmSettingsRequest {
+  enabled: boolean;
+  offlineMode: boolean;
+  provider: LlmProvider;
+  model: string;
+  apiKey?: string | null;
+}
+
+export interface LlmRunSummary {
+  id: string;
+  extractionRunId: string;
+  provider: string;
+  model: string;
+  schemaName: string;
+  promptVersion: string;
+  status: "queued" | "running" | "succeeded" | "failed" | "rejected";
+  inputTokenCount: number;
+  outputTokenCount: number;
+  errorMessage?: string | null;
+  createdAt: string;
+  finishedAt?: string | null;
+}
+
+export interface DomainWriteSummary {
+  rfpProjectId: string;
+  fieldsWritten: number;
+  requirementsWritten: number;
+  procurementItemsWritten: number;
+  staffingRequirementsWritten: number;
+  deliverablesWritten: number;
+  acceptanceCriteriaWritten: number;
+  riskClausesWritten: number;
+  evidenceLinksWritten: number;
+  rejectedRecords: number;
+  rejections: Array<{
+    severity: string;
+    findingType: string;
+    message: string;
+    targetTable?: string | null;
+  }>;
+}
